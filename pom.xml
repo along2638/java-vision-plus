@@ -171,23 +171,23 @@
             <artifactId>elasticsearch</artifactId>
          <version>7.14.0</version>
         </dependency>
-        <!-- 语音识别 -->
-        <dependency>
-            <groupId>net.java.dev.jna</groupId>
-            <artifactId>jna</artifactId>
-            <version>5.13.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.alphacephei</groupId>
-            <artifactId>vosk</artifactId>
-            <version>0.3.45</version>
-        </dependency>
-        <!-- JAVE2（Java音频视频编码器）库是ffmpeg项目上的Java包装器。 -->
-        <dependency>
-            <groupId>ws.schild</groupId>
-            <artifactId>jave-core</artifactId>
-            <version>3.2.0</version>
-        </dependency>
+<!--        &lt;!&ndash; 语音识别 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>net.java.dev.jna</groupId>-->
+<!--            <artifactId>jna</artifactId>-->
+<!--            <version>5.13.0</version>-->
+<!--        </dependency>-->
+<!--        <dependency>-->
+<!--            <groupId>com.alphacephei</groupId>-->
+<!--            <artifactId>vosk</artifactId>-->
+<!--            <version>0.3.45</version>-->
+<!--        </dependency>-->
+<!--        &lt;!&ndash; JAVE2（Java音频视频编码器）库是ffmpeg项目上的Java包装器。 &ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>ws.schild</groupId>-->
+<!--            <artifactId>jave-core</artifactId>-->
+<!--            <version>3.2.0</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

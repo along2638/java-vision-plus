@@ -41,12 +41,12 @@ public class OcrController {
         return bizService.jsonOcr(null,file,request);
     }
     @PostMapping("/word")
-    @Operation(summary = "识别文字(DJL极耗内存需优化)")
+    @Operation(summary = "识别文字(DJL)")
     public String ppWorld(MultipartFile file, HttpServletRequest request) throws Exception {
         return bizService.ppWorld(null,file,request);
     }
     @PostMapping("/word/json")
-    @Operation(summary = "识别文字(DJL极耗内存需优化)")
+    @Operation(summary = "识别文字(DJL)")
     public List<WordBlock> jsonPpWorld(MultipartFile file, HttpServletRequest request) throws Exception {
         return bizService.jsonPpWorld(null,file,request);
     }
