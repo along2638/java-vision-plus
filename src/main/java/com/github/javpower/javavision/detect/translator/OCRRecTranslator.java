@@ -39,7 +39,7 @@ public class OCRRecTranslator implements Translator<Image, WordBlock> {
     @Override
     public void prepare(TranslatorContext ctx) throws IOException {
         try {
-            JarFileUtils.copyFileFromJar("/models/ppocr_keys_v1.txt", PathConstants.ONNX, null, false, true);
+            JarFileUtils.copyFileFromJar("/onnx/models/ppocr_keys_v1.txt", PathConstants.ONNX, null, false, true);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
