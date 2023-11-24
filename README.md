@@ -6,6 +6,7 @@
 
   >JavaVision是完全开源、免费并支持多平台部署视觉智能识别项目
   >如果该项目对您有帮助，您的star是我不断优化的动力！！！
+  >模型文件去hub下载https://xxxx/javpower/JavaVision
 
 ## 👏 项目特点
 
