@@ -22,7 +22,7 @@ public class ImageUtil extends ImgUtil {
 
 
     /**
-     * 绘制图片
+     * 绘制图片 test
      * <p>
      * 根据传入的坐标点绘制矩形框，并在矩形框底下添加文字
      * </p>
