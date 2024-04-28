@@ -1,5 +1,9 @@
 # JavaVision
-
+[![GitHub stars](https://img.shields.io/github/stars/javpower/JavaVision.svg)](https://github.com/javpower/JavaVision)
+[![GitHub issues](https://img.shields.io/github/issues/javpower/JavaVision.svg)](https://github.com/javpower/JavaVision/issues)
+[![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Java Version](https://img.shields.io/badge/java-1.8+-orange.svg)](https://adoptopenjdk.net/)
+[![Spring Boot](https://img.shields.io/badge/spring--boot-blue.svg)](https://spring.io/projects/spring-boot)
 ## 🪧 项目起源
 
 - JavaVision是一个基于Java开发的全能视觉智能识别项目。该项目起源于对图像处理和人工智能领域的热情，以及对Java作为主要编程语言的坚持。在AI领域，大多数解决方案都是使用Python实现的，因此决定充分利用Java的优势来构建一个功能强大且易于集成的视觉智能识别平台。
