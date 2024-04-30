@@ -12,6 +12,10 @@
   >如果该项目对您有帮助，您的star是我不断优化的动力！！！
   >模型文件去hub下载javpower/JavaVision
 
+
+## 鸣谢
+- 感谢开源项目提供基础支撑：https://gitee.com/agricultureiot/yolo-onnx-java
+
 ## 👏 项目特点
 
 JavaVision具有以下突出特点：
