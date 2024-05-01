@@ -79,21 +79,23 @@ public class FaceService {
         if(CollectionUtil.isNotEmpty(allJson)){
             String path = getPath(file);
             List<FaceObject> faceObjects = FaceDetectUtil.faceDetect(path);
-            FaceObject faceObject = faceObjects.get(0);
-            Float[] feature = faceObject.getFeature().toArray(new Float[0]);
-            FaceParam res=null;
-            float ff=0f;
-            for (FaceParam v : allJson) {
-                Float[] feature1 = v.getFeature().toArray(new Float[0]);
-                float v1 = FaceSimilarityCalculator.calculateCosineSimilarity(feature, feature1);
-                if(v1>ff){
-                    ff=v1;
-                    res=v;
+            if (CollectionUtil.isNotEmpty(faceObjects)){
+                FaceObject faceObject = faceObjects.get(0);
+                Float[] feature = faceObject.getFeature().toArray(new Float[0]);
+                FaceParam res=null;
+                float ff=0f;
+                for (FaceParam v : allJson) {
+                    Float[] feature1 = v.getFeature().toArray(new Float[0]);
+                    float v1 = FaceSimilarityCalculator.calculateCosineSimilarity(feature, feature1);
+                    if(v1>ff){
+                        ff=v1;
+                        res=v;
+                    }
                 }
-            }
-            if(ff>0.8f){
-                personObject.setPersonName(res.getPersonName());
-                personObject.setPersonId(res.getPersonId());
+                if(ff>0.8f){
+                    personObject.setPersonName(res.getPersonName());
+                    personObject.setPersonId(res.getPersonId());
+                }
             }
         }
         return personObject;
