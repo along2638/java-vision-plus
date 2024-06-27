@@ -810,7 +810,8 @@ docker一键部署
 ```javascript
 
 ```
-
+## 加群讨论
+![输入图片说明](docs/img/1ced4513_1451768.jpg)
 ## 开源许可
 
 使用 [Apache License 2.0](https://gitee.com/giteeClass/java-vision/raw/master/LICENSE)
