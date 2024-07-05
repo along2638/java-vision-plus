@@ -15,8 +15,8 @@
 
 ## 鸣谢
 - 感谢开源项目提供基础支撑：
-https://gitee.com/agricultureiot/yolo-onnx-java
-https://gitee.com/qj-zye/java_pytorch_onnx_tensorrt_yolov8_vue
+- https://gitee.com/agricultureiot/yolo-onnx-java
+- https://gitee.com/qj-zye/java_pytorch_onnx_tensorrt_yolov8_vue
 
 ## 👏 项目特点
 
