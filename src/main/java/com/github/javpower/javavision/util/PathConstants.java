@@ -16,7 +16,7 @@ public class PathConstants {
      */
     public static final String NCNN = "/ncnn";
     public static final String ONNX = "/onnx";
-
+    public static final String ONNX_NAME = "onnx";
     /**
      * 模型相关
      **/
