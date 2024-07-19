@@ -11,6 +11,8 @@ public class FaceParam {
     private String personId="0000";
     @Schema(required=true)
     private String personName;
+
+
     private List<Float> feature;
 
 }

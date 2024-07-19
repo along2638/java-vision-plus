@@ -65,3 +65,13 @@ milvus:
 
 image:
   service: milvus # 或者 es
+
+# 使用虹软人脸识别，需要申请sdk密钥（该项目示例搭配的的是milvus数据库）
+config:
+  arcface-sdk:
+    version: "3.0"
+    app-id: "xxxxxx"
+    sdk-key: "xxxxxxxx"
+    active_key: "#此处不要填写"
+    detect-pool-size: 5
+    compare-pool-size: 5

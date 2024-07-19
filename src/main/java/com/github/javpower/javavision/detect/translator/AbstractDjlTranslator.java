@@ -9,8 +9,6 @@ import com.github.javpower.javavision.util.JarFileUtils;
 import com.github.javpower.javavision.util.OpenCVExtendUtil;
 import com.github.javpower.javavision.util.PathConstants;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-
 
 import java.io.File;
 import java.io.IOException;
