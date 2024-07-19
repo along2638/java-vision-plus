@@ -6,6 +6,7 @@ import ai.djl.training.util.ProgressBar;
 import ai.djl.translate.Translator;
 import com.github.javpower.javavision.util.DjlHandlerUtil;
 import com.github.javpower.javavision.util.JarFileUtils;
+import com.github.javpower.javavision.util.OpenCVExtendUtil;
 import com.github.javpower.javavision.util.PathConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -25,7 +26,8 @@ public abstract class AbstractDjlTranslator<T> {
     static {
         // 加载opencv动态库，
         //System.load(ClassLoader.getSystemResource("lib/opencv_java470-无用.dll").getPath());
-        nu.pattern.OpenCV.loadLocally();
+//        nu.pattern.OpenCV.loadLocally();
+        OpenCVExtendUtil.init();
     }
 
     public AbstractDjlTranslator(String modelName, Map<String, Object> arguments) {
@@ -43,7 +45,7 @@ public abstract class AbstractDjlTranslator<T> {
 //        String model_path = PathConstants.TEMP_DIR + PathConstants.ONNX + "/" + modelName;
         String modelPath = PathConstants.TEMP_DIR + File.separator+PathConstants.ONNX_NAME+ File.separator + modelName;
         log.info("路径修改前:{}",modelPath);
-        modelPath= DjlHandlerUtil.getFixModelPath(modelPath);
+        modelPath= DjlHandlerUtil.getFixedModelPath(modelPath);
         log.info("路径修改后:{}",modelPath);
         Criteria<Image, T> criteria =
                 Criteria.builder()

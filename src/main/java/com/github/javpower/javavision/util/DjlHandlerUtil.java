@@ -26,6 +26,6 @@ public class DjlHandlerUtil {
         // 将路径中的反斜杠替换为正斜杠，以符合URL格式
         String fixedPath = modelPath.replace("\\", "/");
         // 构建URL格式的文件路径
-        return "file://" + fixedPath;
+        return "file:///" + fixedPath;
     }
 }
