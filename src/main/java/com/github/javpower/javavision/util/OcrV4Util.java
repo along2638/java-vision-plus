@@ -119,7 +119,7 @@ public class OcrV4Util {
             dstPoint2f.release();
 
         }
-
+        mat.release();
         return result;
     }
     // 将 OpenCV 的 Mat 转换为 DJL 的 Image
