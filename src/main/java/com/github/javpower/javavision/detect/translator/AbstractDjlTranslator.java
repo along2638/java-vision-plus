@@ -4,13 +4,18 @@ import ai.djl.modality.cv.Image;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.training.util.ProgressBar;
 import ai.djl.translate.Translator;
+import com.github.javpower.javavision.util.DjlHandlerUtil;
 import com.github.javpower.javavision.util.JarFileUtils;
 import com.github.javpower.javavision.util.PathConstants;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
+@Slf4j
 public abstract class AbstractDjlTranslator<T> {
 
     public String modelName;
@@ -35,11 +40,15 @@ public abstract class AbstractDjlTranslator<T> {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String model_path = PathConstants.TEMP_DIR + PathConstants.ONNX + "/" + modelName;
+//        String model_path = PathConstants.TEMP_DIR + PathConstants.ONNX + "/" + modelName;
+        String modelPath = PathConstants.TEMP_DIR + File.separator+PathConstants.ONNX_NAME+ File.separator + modelName;
+        log.info("路径修改前:{}",modelPath);
+        modelPath= DjlHandlerUtil.getFixModelPath(modelPath);
+        log.info("路径修改后:{}",modelPath);
         Criteria<Image, T> criteria =
                 Criteria.builder()
                         .setTypes(Image.class, getClassOfT())
-                        .optModelUrls(model_path)
+                        .optModelUrls(modelPath)
                         .optTranslator(translator)
                         .optEngine(getEngine()) // Use PyTorch engine
                         .optProgress(new ProgressBar())
@@ -53,5 +62,6 @@ public abstract class AbstractDjlTranslator<T> {
     protected abstract Class<T> getClassOfT();
 
     protected abstract String getEngine();
+
 }
 
