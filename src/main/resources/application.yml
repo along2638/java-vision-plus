@@ -52,3 +52,16 @@ es:
   - 127.0.0.1:9200 # es连接地址+端口 格式必须为ip:port
 #  username: gc
 #  password: 123456
+
+# 该数据库仅作为测试，不定期删除
+milvus:
+  uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
+  token: 6fab5641a3156d2666feba14390e4ef4b6d376b5dce91faed303eec91a4bdb82239b70b29eb252b981daa3170516245818d4ee12
+  enable: true # 是否启用
+  packages:
+    - com.github.javpower.javavision.milvus.model
+  open-log: true
+  log-level: WARN
+
+image:
+  service: milvus # 或者 es

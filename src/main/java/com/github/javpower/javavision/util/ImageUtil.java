@@ -1,9 +1,14 @@
 package com.github.javpower.javavision.util;
 
 import com.github.javpower.javavision.entity.Detection;
+import org.apache.commons.math3.linear.ArrayRealVector;
+import org.apache.commons.math3.linear.MatrixUtils;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -183,6 +188,40 @@ public class ImageUtil {
                     .5, color,
                     1);
         }
+    }
+    //降维度,PCA（主成分分析）算法来降低维度
+    public static List<Float> reduceDimension(List<Float> vector, int targetDimension) {
+        // 将List<Float>转换为RealVector
+        RealVector v = new ArrayRealVector(vector.stream().mapToDouble(Float::doubleValue).toArray());
+        // 创建一个简单的投影矩阵（这里使用随机投影作为示例）
+        RealMatrix projectionMatrix = MatrixUtils.createRealMatrix(targetDimension, vector.size());
+        for (int i = 0; i < targetDimension; i++) {
+            for (int j = 0; j < vector.size(); j++) {
+                projectionMatrix.setEntry(i, j, Math.random() - 0.5);
+            }
+        }
+        // 进行降维
+        RealVector reducedVector = projectionMatrix.operate(v);
+        // 将结果转换回List<Float>
+        List<Float> result = new ArrayList<>();
+        for (double d : reducedVector.toArray()) {
+            result.add((float) d);
+        }
+        return normalizeVector(result);
+    }
+    //归一化
+    public static List<Float> normalizeVector(List<Float> vector) {
+        double sumOfSquares = 0.0;
+        for (float value : vector) {
+            sumOfSquares += value * value;
+        }
+        double magnitude = Math.sqrt(sumOfSquares);
+
+        List<Float> normalizedVector = new ArrayList<>();
+        for (float value : vector) {
+            normalizedVector.add((float) (value / magnitude));
+        }
+        return normalizedVector;
     }
 
 }

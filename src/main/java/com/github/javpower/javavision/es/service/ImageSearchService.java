@@ -9,6 +9,7 @@ import cn.hutool.json.JSONUtil;
 import com.github.javpower.javavision.es.config.EsConfig;
 import com.github.javpower.javavision.es.entity.ImageSearch;
 import com.github.javpower.javavision.es.response.SearchResult;
+import com.github.javpower.javavision.service.IImageService;
 import com.github.javpower.javavision.util.FileUtil;
 import com.github.javpower.javavision.util.ImageFeatureUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +35,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
-@Service
+@Service("ImageSearchService")
 @Slf4j
-public class ImageSearchService {
+public class ImageSearchService implements IImageService {
     private final RestHighLevelClient restHighLevelClient;
 
     private final FileUtil fileUtil;
