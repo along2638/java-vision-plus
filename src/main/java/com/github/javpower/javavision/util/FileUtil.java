@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -25,6 +26,10 @@ public class FileUtil {
         // 获取文件后缀
         String extension = FilenameUtils.getExtension(originalFileName);
         String target= UUID.fastUUID().toString().replace("-","")+"."+extension;
+        File parentFilePath=new File(fileProperties.getUploadPath());
+        if(!parentFilePath.exists()){
+            parentFilePath.mkdirs();
+        }
         // 构建目标文件路径
         Path targetLocation = Paths.get(fileProperties.getUploadPath()).resolve(target);
         // 将文件保存到目标路径
