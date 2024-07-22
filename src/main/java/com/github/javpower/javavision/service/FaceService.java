@@ -16,6 +16,7 @@ import com.github.javpower.javavision.entity.FaceParam;
 import com.github.javpower.javavision.entity.PersonObject;
 import com.github.javpower.javavision.util.FaceDetectUtil;
 import com.github.javpower.javavision.util.FaceSimilarityCalculator;
+import com.github.javpower.javavision.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
@@ -39,6 +40,8 @@ public class FaceService {
     @Autowired
     private FileProperties fileProperties;
 
+    @Autowired
+    private FileUtil fileUtil;
     public String addFace(FaceParam param, MultipartFile file, HttpServletRequest request) throws IOException, TranslateException, ModelNotFoundException, MalformedModelException, OrtException {
         List<FaceParam> allJson = getAllJson();
         if(CollectionUtil.isNotEmpty(allJson)){
@@ -109,25 +112,26 @@ public class FaceService {
         return false;
     }
     public String getPath(MultipartFile file) throws IOException {
-        String originalFilename = file.getOriginalFilename();
-        log.info("originalFilename:" + originalFilename);
-        // 获取文件后缀
-        String extension = FilenameUtils.getExtension(originalFilename);
-        String newFileName = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN) + RandomStringUtils.randomNumeric(6) + "." + extension;
-        log.info("newFileName:" + newFileName);
-        // 本地文件上传路径
-        String uploadPath = fileProperties.getUploadPath();
-        File uploadDir = new File(uploadPath);
-        // 上传目录不存在，则直接创建
-        if (!uploadDir.exists()) {
-            uploadDir.mkdirs();
-        }
-        // 上传文件到本地目录
-        File uploadFile = new File(uploadDir, newFileName);
-        log.info("uploadFile:" + uploadFile);
-        file.transferTo(uploadFile);
-        String imgPath = uploadPath+newFileName;
-        return imgPath;
+//        String originalFilename = file.getOriginalFilename();
+//        log.info("originalFilename:" + originalFilename);
+//        // 获取文件后缀
+//        String extension = FilenameUtils.getExtension(originalFilename);
+//        String newFileName = DateUtil.format(new Date(), DatePattern.PURE_DATETIME_MS_PATTERN) + RandomStringUtils.randomNumeric(6) + "." + extension;
+//        log.info("newFileName:" + newFileName);
+//        // 本地文件上传路径
+//        String uploadPath = fileProperties.getUploadPath();
+//        File uploadDir = new File(uploadPath);
+//        // 上传目录不存在，则直接创建
+//        if (!uploadDir.exists()) {
+//            uploadDir.mkdirs();
+//        }
+//        // 上传文件到本地目录
+//        File uploadFile = new File(uploadDir, newFileName);
+//        log.info("uploadFile:" + uploadFile);
+//        file.transferTo(uploadFile);
+//        String imgPath = uploadPath+newFileName;
+//        return imgPath;
+        return  fileUtil.getPath(file);
     }
 
     public void addJsonFile(FaceParam param){
