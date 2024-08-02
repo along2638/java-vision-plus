@@ -219,6 +219,8 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
                     <mainClass>com.github.javpower.javavision.JavaVisionApplication</mainClass>
+                    <includeSystemScope>true</includeSystemScope>
+                    <fork>true</fork>
                 </configuration>
             </plugin>
             <!-- 打包时跳过测试 -->

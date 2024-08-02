@@ -28,7 +28,7 @@ public class ArcFaceAutoConfiguration implements InitializingBean, DisposableBea
 
     public static String CACHE_LIB_FOLDER;
 
-    private static final String LIBS_DIRECTORY = "libs/";
+    private static final String LIBS_DIRECTORY = "libs.";
     private static final String DEFAULT_SUFFIX = ".dll";
     private static final String SO_SUFFIX = ".so";
 
