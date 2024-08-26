@@ -30,17 +30,25 @@ public class ArcSoftFaceController {
     private FaceMilvusService faceMilvusService;
     @PostMapping("/add")
     @Operation(summary = "添加人脸")
-    public void addFace(FaceParam param, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+    public void addFace(@RequestParam(value = "personId") String personId, @RequestParam(value = "personName") String personName,@RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
+        param.setPersonName(personName);
         faceMilvusService.add(param.getPersonId(),param.getPersonName(),file);
     }
     @PostMapping("/update")
     @Operation(summary = "更新人脸")
-    public void updateFace(FaceParam param,  @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+    public void updateFace(@RequestParam(value = "personId") String personId, @RequestParam(value = "personName") String personName, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
+        param.setPersonName(personName);
         faceMilvusService.update(param,file,request);
     }
     @PostMapping("/del")
     @Operation(summary = "删除人脸")
-    public void delFace(FaceParam param, HttpServletRequest request) throws Exception {
+    public void delFace(@RequestParam(value = "personId") String personId, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
         faceMilvusService.del(param,request);
     }
     @PostMapping("/search")

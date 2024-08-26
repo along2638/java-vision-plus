@@ -8,7 +8,10 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,17 +30,25 @@ public class FaceController {
     private FaceService faceService;
     @PostMapping("/add")
     @Operation(summary = "添加人脸")
-    public String addFace(FaceParam param, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+    public String addFace(@RequestParam(value = "personId") String personId, @RequestParam(value = "personName") String personName, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
+        param.setPersonName(personName);
         return faceService.addFace(param,file,request);
     }
     @PostMapping("/update")
     @Operation(summary = "更新人脸")
-    public String updateFace(FaceParam param, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
-         return faceService.updateFace(param,file,request);
+    public String updateFace(@RequestParam(value = "personId") String personId, @RequestParam(value = "personName") String personName, @RequestParam(value = "file")MultipartFile file, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
+        param.setPersonName(personName);
+        return faceService.updateFace(param,file,request);
     }
     @PostMapping("/del")
     @Operation(summary = "删除人脸")
-    public String delFace(FaceParam param, HttpServletRequest request) throws Exception {
+    public String delFace(@RequestParam(value = "personId") String personId, HttpServletRequest request) throws Exception {
+        FaceParam param=new FaceParam();
+        param.setPersonId(personId);
         return faceService.delFace(param,null,request);
     }
     @PostMapping("/search")
