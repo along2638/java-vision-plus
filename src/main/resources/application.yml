@@ -24,7 +24,10 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 200MB
-
+  redis:
+    host: 127.0.0.1
+    port: 6379
+    password:
 
 ocr:
   # 文件上传相关配置
@@ -32,7 +35,7 @@ ocr:
     # 上传文件访问路径
     accessPath: /file/**
     # 上传文件保存路径
-    uploadPath: /opt/ocr/
+    uploadPath: image/
 vision:
   # swagger配置
   openapi:
@@ -57,14 +60,19 @@ es:
 milvus:
   uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
   token: 6fab5641a3156d2666feba14390e4ef4b6d376b5dce91faed303eec91a4bdb82239b70b29eb252b981daa3170516245818d4ee12
-  enable: true # 是否启用
+  enable: false # 是否启用
   packages:
     - com.github.javpower.javavision.milvus.model
   open-log: true
-  log-level: WARN
+#  log-level: WARN
+
+vectorex:
+  enable: true # 是否启用
+  packages:
+    - com.github.javpower.javavision.vectorex.model
 
 image:
-  service: milvus # 或者 es
+  service: vectorex # 或者 es、milvus
 
 # 使用虹软人脸识别，需要申请sdk密钥（该项目示例搭配的的是milvus数据库）
 config:
@@ -75,3 +83,21 @@ config:
     active_key: "#此处不要填写"
     detect-pool-size: 5
     compare-pool-size: 5
+
+
+
+#redisson:
+#  timeout: 3000            # 超时时间（毫秒）
+#  address: "127.0.0.1:6379" # Redis地址
+#  password: "" # Redis密码
+
+jedis:
+  nodes:
+    - 127.0.0.1:6379
+  pool:
+    minIdle: 64
+    maxIdle: 64
+    maxTotal: 128
+  timeout: 500
+
+

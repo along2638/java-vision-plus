@@ -5,6 +5,7 @@ import com.github.javpower.javavision.es.response.SearchResult;
 import com.github.javpower.javavision.es.service.ImageSearchService;
 import com.github.javpower.javavision.milvus.service.ImageMilvusService;
 import com.github.javpower.javavision.service.IImageService;
+import com.github.javpower.javavision.vectorex.service.ImageVectoRexService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -31,10 +32,10 @@ public class ImageController implements EnvironmentAware {
     private IImageService imageService;
     private String impl;
 
-    public ImageController(Environment environment,ImageSearchService imageSearchService,ImageMilvusService imageMilvusService) {
+    public ImageController(Environment environment,ImageSearchService imageSearchService,ImageMilvusService imageMilvusService,ImageVectoRexService imageVectoRexService) {
         // 从环境对象中获取配置项的值
         this.impl = environment.getProperty("image.service");
-        initializeService(imageSearchService, imageMilvusService);
+        initializeService(imageSearchService, imageMilvusService,imageVectoRexService);
     }
     @PostMapping("/add")
     @Operation(summary = "添加")
@@ -46,15 +47,22 @@ public class ImageController implements EnvironmentAware {
     public List<SearchResult> search(Integer k, MultipartFile file, HttpServletRequest request) throws Exception {
         return imageService.search(file.getInputStream(),k);
     }
+    @PostMapping("/del")
+    @Operation(summary = "删除")
+    public void del(String imageId, HttpServletRequest request) throws Exception {
+        imageService.del(imageId);
+    }
 
     @Override
     public void setEnvironment(Environment environment) {
 
     }
     // 根据配置项初始化服务
-    private void initializeService(ImageSearchService imageSearchService, ImageMilvusService imageMilvusService) {
+    private void initializeService(ImageSearchService imageSearchService, ImageMilvusService imageMilvusService, ImageVectoRexService imageVectoRexService) {
         if ("milvus".equalsIgnoreCase(impl)) {
             this.imageService = imageMilvusService;
+        } if ("vectorex".equalsIgnoreCase(impl)) {
+            this.imageService = imageVectoRexService;
         } else {
             this.imageService = imageSearchService;
         }

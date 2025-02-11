@@ -86,6 +86,12 @@ public class ImageSearchService implements IImageService {
         }
         return list;
     }
+
+    @Override
+    public void del(String imageId) {
+
+    }
+
     private void batchAdd(List<ImageSearch> imageSearchList) throws IOException, ModelException, TranslateException, OrtException {
         //批量上传请求
         BulkRequest bulkRequest = new BulkRequest(EsConfig.IMAGE_SEARCH_INDEX);
