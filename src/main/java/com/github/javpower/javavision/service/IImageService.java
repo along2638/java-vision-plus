@@ -15,4 +15,5 @@ public interface IImageService {
 
     List<SearchResult> search(InputStream input, int k) throws IOException, ModelException, TranslateException, OrtException;
 
+    void del(String imageId);
 }

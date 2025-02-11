@@ -67,6 +67,12 @@ public class ImageMilvusService implements IImageService {
         }
         return res;
     }
+
+    @Override
+    public void del(String imageId) {
+        imageMilvusMapper.deleteWrapper().eq(Image::getImageId,imageId).remove();
+    }
+
     private void batchAdd(List<Image> imageSearchList) throws IOException, ModelException, TranslateException, OrtException {
         //批量上传请求
         for (Image imageSearch : imageSearchList) {
