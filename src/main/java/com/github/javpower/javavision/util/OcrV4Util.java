@@ -125,10 +125,18 @@ public class OcrV4Util {
     // 将 OpenCV 的 Mat 转换为 DJL 的 Image
     public static Image matToImage(Mat mat) {
         // 将 Mat 对象转换为 BufferedImage 对象
-        int type = BufferedImage.TYPE_BYTE_GRAY;
-        if (mat.channels() > 1) {
+        int channels = mat.channels();
+        int type;
+        if (channels == 1) {
+            type = BufferedImage.TYPE_BYTE_GRAY;
+        } else if (channels == 3) {
             type = BufferedImage.TYPE_3BYTE_BGR;
+        } else if (channels == 4) {
+            type = BufferedImage.TYPE_4BYTE_ABGR;  // 处理四通道（例如BGRA）
+        } else {
+            throw new IllegalArgumentException("Unsupported channels: " + channels);
         }
+
         int bufferSize = mat.channels() * mat.cols() * mat.rows();
         byte[] buffer = new byte[bufferSize];
         mat.get(0, 0, buffer); // 获取 Mat 数据到缓冲区
