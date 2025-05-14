@@ -13,10 +13,6 @@
   >免费使用 OCR，https://ocr.m78cloud.cn
 
 
-## 鸣谢
-- 感谢开源项目提供基础支撑：
-- https://gitee.com/agricultureiot/yolo-onnx-java
-- https://gitee.com/qj-zye/java_pytorch_onnx_tensorrt_yolov8_vue
 
 ## 👏 项目特点
 
@@ -813,8 +809,7 @@ docker一键部署
 ```javascript
 
 ```
-## 加群讨论
-![输入图片说明](docs/img/1ced4513_1451768.jpg)
+
 ## 开源许可
 
 使用 [Apache License 2.0](https://gitee.com/giteeClass/java-vision/raw/master/LICENSE)
