@@ -59,7 +59,7 @@
 | Maven | 3.6+ | 构建时必需 |
 | PostgreSQL | 12+ | **必需**，人脸库与图库元数据 |
 | Redis | 5+ | 可选，缓存不可用时自动查库 |
-| MinIO | 任意较新版本 | 可选，`minio.enabled=false` 回退本地磁盘 |
+| MinIO | 任意较新版本 | 可选，默认关闭；`MINIO_ENABLED=true` 启用时需配访问密钥 |
 | Milvus / Elasticsearch | — | 可选，仅在对应向量库实现下需要 |
 
 模型文件与各平台原生库已随仓库提供（`src/main/resources`，约 665MB），无需额外下载。
@@ -116,26 +116,42 @@ java -Xms1g -Xmx2g -jar target/java-vision-plus-0.0.1-SNAPSHOT.jar
 
 ## ⚙️ 配置
 
-所有中间件连接均可用环境变量覆盖，`application.yml` 里的默认值是内网测试环境，**生产部署必须覆盖**（仓库公开时建议把默认值清空）。
+**凭证不写进仓库**：`application.yml` 里的数据库密码与 MinIO 密钥全部留空，只在环境变量或启动参数中提供。缺失时应用在启动阶段直接报错并列出缺哪个变量，不会带着空密码去连库、然后抛一句看不懂的 `authentication failed`。
+
+### 推荐做法：env.local 文件
+
+```powershell
+Copy-Item tools\env.example.ps1 tools\env.local.ps1   # 填入真实值
+.\tools\run.ps1                                       # 脚本启动前自动加载
+```
+
+`tools/env.local.*` 已加入 `.gitignore`；Linux 用 `tools/env.example.sh` → `tools/env.local.sh`，`rebuild.sh` 同样自动加载。
+
+### 环境变量
 
 | 变量 | 默认值 | 说明 |
 | --- | --- | --- |
-| `PG_HOST` / `PG_PORT` / `PG_DB` | `127.0.0.1` / `5432` / `java_vision` | PostgreSQL 连接 |
-| `PG_USER` / `PG_PASSWORD` | `postgres` / `postgres` | 数据库账号 |
-| `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` | `127.0.0.1` / `16377` / `0` | Redis 连接 |
-| `REDIS_PASSWORD` | — | Redis 密码 |
-| `MINIO_ENDPOINT` / `MINIO_PUBLIC_URL` | `http://127.0.0.1:9000` | MinIO 内网地址与对外访问地址 |
-| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` | — | MinIO 凭证 |
+| `PG_HOST` / `PG_PORT` / `PG_DB` | `127.0.0.1` / `5432` / `java_vision` | PostgreSQL 地址 |
+| `PG_USER` / `PG_PASSWORD` | `postgres` / **空** | 账号与密码，密码缺失启动报错 |
+| `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` | `127.0.0.1` / `6379` / `0` | Redis，连不上自动降级查库 |
+| `REDIS_PASSWORD` | 空 | 免密实例留空即可 |
+| `MINIO_ENABLED` | `false` | `true` 才启用对象存储，否则文件落本地磁盘 |
+| `MINIO_ENDPOINT` / `MINIO_PUBLIC_URL` | `http://127.0.0.1:9000` | 内网地址 / 对外访问地址 |
+| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` | **空** | `MINIO_ENABLED=true` 时必填，否则启动报错 |
 | `MINIO_BUCKET` | `javavision` | 桶名，沿用上游以免历史图片地址失效 |
-| `MILVUS_URI` / `MILVUS_TOKEN` | 上游测试实例 / 空 | 虹软人脸与 `image.service=milvus` 时需要 |
+| `MILVUS_URI` / `MILVUS_TOKEN` | 空 | 虹软人脸与 `image.service=milvus` 时需要 |
 | `LEGACY_HTTP_STATUS` | `false` | `true` 时异常也返回 HTTP 200，用于兼容老前端 |
 | `INFERENCE_THREADS` | `0` | 推理线程数，`0` 表示不干预（引擎默认＝逻辑核数） |
 | `LOG_HOME` | `logs` | 日志目录，容器部署建议挂盘 |
 
+> PostgreSQL 若使用 trust 免密认证，`PG_PASSWORD` 填任意占位值即可（服务端不校验）。
+
+启动前校验由 `config/StartupConfigCheck` 完成，检查项：`spring.datasource.{url,username,password}`，以及 `minio.enabled=true` 时的 `minio.{endpoint,access-key,secret-key}`。
+
 其他行为开关在 `application.yml`：
 
 - `vision.inference.warmup.enabled` / `async` / `predict`：启动预热，默认开启并异步、加载后空跑一次
-- `minio.enabled`：`false` 时文件存本地磁盘，行为与改造前一致
+- `minio.enabled`：默认 `false`，文件存本地磁盘；启用需同时配好密钥
 - `image.service`：以图搜图实现，`vectorex`（默认）/ `milvus` / `es`
 - `es.enable`：未部署 Elasticsearch 时保持 `false`
 

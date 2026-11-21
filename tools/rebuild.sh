@@ -18,6 +18,8 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 PORT="${PORT:-6888}"
+# 本地/部署凭证：env.local.sh 存在则加载（已 gitignore，不入库；模板见 env.example.sh）
+if [ -f "tools/env.local.sh" ]; then . tools/env.local.sh; fi
 JAR="target/java-vision-plus-0.0.1-SNAPSHOT.jar"
 # 运行用副本：mvn clean 会删 target，别人（或 IDE、并行会话）打包时，
 # 从 target 里正在运行的 jar 会被删除/重写，进程必挂。副本放在 .run/，clean 碰不到。

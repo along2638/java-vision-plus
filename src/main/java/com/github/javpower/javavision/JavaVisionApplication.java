@@ -1,5 +1,6 @@
 package com.github.javpower.javavision;
 
+import com.github.javpower.javavision.config.StartupConfigCheck;
 import com.github.javpower.javavision.util.DjlModelUtil;
 import com.github.javpower.javavision.util.InferenceDevice;
 import com.github.javpower.javavision.util.InferenceThreads;
@@ -33,7 +34,12 @@ public class JavaVisionApplication {
         InferenceThreads.initFromArgs(args);
 
         Runtime.getRuntime().addShutdownHook(new Thread(DjlModelUtil::clear, "djl-model-release"));
-        ConfigurableApplicationContext context = SpringApplication.run(JavaVisionApplication.class, args);
+
+        SpringApplication application = new SpringApplication(JavaVisionApplication.class);
+        // 容器刷新前校验必需配置（数据库、对象存储凭证）。spring.sql.init 在刷新阶段就会建连接，
+        // 放到 Runner 里检查已经太晚，所以挂到 Environment 就绪事件上。
+        application.addListeners(new StartupConfigCheck());
+        ConfigurableApplicationContext context = application.run(args);
         log.info("接口文档: http://localhost:{}/doc.html",
                 context.getEnvironment().getProperty("local.server.port", DEFAULT_PORT));
     }

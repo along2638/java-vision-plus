@@ -24,10 +24,9 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 200MB
-  # PostgreSQL：人脸特征、图库元数据的持久化存储
-  # 注意：下面这些默认值是内网测试环境的连接信息，仅供本地联调。生产必须通过
-  #   PG_HOST / PG_PORT / PG_DB / PG_USER / PG_PASSWORD 环境变量覆盖，
-  #   部署脚本里不要依赖这里的默认值。
+  # PostgreSQL：人脸特征、图库元数据的持久化存储（必需）
+  # 凭证不入库：PG_PASSWORD 没有默认值，缺失时启动前就会报错并指出缺哪个变量。
+  # 本地开发把真实值写进 tools/env.local.ps1（已 gitignore），由 tools/run.ps1 自动加载。
   datasource:
     url: jdbc:postgresql://${PG_HOST:127.0.0.1}:${PG_PORT:5432}/${PG_DB:java_vision}
     username: ${PG_USER:postgres}
@@ -49,12 +48,12 @@ spring:
       schema-locations: classpath:db/schema-pg.sql
       # 脚本含中文注释，必须显式指定编码，否则 Windows 下按 GBK 读取会乱码
       encoding: UTF-8
-  # Redis：缓存人脸特征、图片特征向量，加速检索
-  # 默认值同样是内网测试环境，生产用 REDIS_HOST / REDIS_PORT / REDIS_PASSWORD 覆盖
+  # Redis：缓存人脸特征、图片特征向量（可选，连不上会自动降级查库）
+  # 密码默认留空以兼容免密实例；有密码时用 REDIS_PASSWORD 注入
   redis:
     host: ${REDIS_HOST:127.0.0.1}
-    port: ${REDIS_PORT:16377}
-    password: ${REDIS_PASSWORD:***REMOVED***}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
     database: ${REDIS_DB:0}
     client-type: lettuce
     timeout: 3000
@@ -93,13 +92,13 @@ ocr:
     deleteAfterUse: true
 
 # MinIO 对象存储：人脸图、图库图等需要长期保留的资源存这里
-# enabled=false 时自动回退为本地磁盘（行为与改造前一致）
-# 生产环境必须用 MINIO_ACCESS_KEY / MINIO_SECRET_KEY 覆盖下面的测试值
+# 默认关闭（文件落本地磁盘，行为与改造前一致）。启用需同时给 MINIO_ENABLED=true 与访问密钥，
+# 缺任意一项启动前就会报错——避免"以为存了对象存储，实际写在本机磁盘"。
 minio:
-  enabled: true
+  enabled: ${MINIO_ENABLED:false}
   endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
   access-key: ${MINIO_ACCESS_KEY:}
-  secret-key: ${MINIO_SECRET_KEY:***REMOVED***}
+  secret-key: ${MINIO_SECRET_KEY:}
   # 桶名沿用上游的 javavision：库里已存的图片地址都指向该桶，改名会导致历史图片全部失效。
   # 需要独立桶时用 MINIO_BUCKET 覆盖，并自行迁移数据。
   bucket: ${MINIO_BUCKET:javavision}

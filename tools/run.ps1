@@ -94,6 +94,15 @@ Write-Host ("[copy] {0:N1} MB -> {1}" -f ((Get-Item $runJar).Length / 1MB), $run
 # 沙箱注入的变量会覆盖 server.port / server.address
 Remove-Item Env:SERVER__PORT, Env:SERVER__HOST -ErrorAction SilentlyContinue
 
+# 本地凭证：env.local.ps1 存在则加载（已 gitignore，不入库；模板见 env.example.ps1）
+$localEnv = Join-Path $PSScriptRoot 'env.local.ps1'
+if (Test-Path $localEnv) {
+    . $localEnv
+    Write-Host "[env] 已加载 $localEnv"
+} else {
+    Write-Host "[env] 未找到 env.local.ps1，使用环境变量中的配置（缺数据库密码会启动失败）"
+}
+
 $javaExe = Join-Path $JavaHome 'bin\java.exe'
 Write-Host "[start] $javaExe -Xms1g -Xmx2g -jar $runJar"
 Start-Process -FilePath $javaExe `

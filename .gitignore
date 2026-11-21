@@ -48,3 +48,7 @@ build/
 /vectorex/
 # 本地 AI 助手的工作区数据（会话记忆、临时产物）
 .workbuddy/
+
+# ===== 本地凭证，一律不入库（模板见 tools/env.example.ps1 / env.example.sh）=====
+/tools/env.local.ps1
+/tools/env.local.sh
