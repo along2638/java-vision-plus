@@ -1,4 +1,4 @@
-# JavaVision 接口文档
+# JavaVision Plus 接口文档
 
 > 本文档覆盖项目全部对外 HTTP 接口，每个接口的入参与返回参数均标注中文说明。
 > 文档与代码注解（springdoc / knife4j）保持同源，改动代码注解后建议同步更新本文档。

@@ -8,11 +8,16 @@
         <version>2.7.12</version>
         <relativePath/>
     </parent>
+    <!--
+      JavaVision Plus —— 基于 javpower/JavaVision（Apache License 2.0）的二次开发增强版。
+      groupId 与 Java 包名保持 com.github.javpower.javavision 不变，只改项目标识，
+      目的是让本仓库与上游的差异始终可以用 git diff 直接对比，也便于后续合并上游更新。
+    -->
     <groupId>com.github.javpower</groupId>
-    <artifactId>JavaVision</artifactId>
+    <artifactId>java-vision-plus</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>JavaVision</name>
-    <description>JavaVision</description>
+    <name>JavaVision Plus</name>
+    <description>基于 JavaVision 二次开发增强的视觉推理服务：OCR、人脸识别、以图搜图</description>
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>

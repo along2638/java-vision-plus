@@ -1,12 +1,41 @@
-# JavaVision
+# JavaVision Plus
 [![GitHub stars](https://img.shields.io/github/stars/along2638/java-vision-plus.svg)](https://github.com/along2638/java-vision-plus)
 [![GitHub issues](https://img.shields.io/github/issues/along2638/java-vision-plus.svg)](https://github.com/along2638/java-vision-plus/issues)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java Version](https://img.shields.io/badge/java-1.8+-orange.svg)](https://adoptopenjdk.net/)
 [![Spring Boot](https://img.shields.io/badge/spring--boot-blue.svg)](https://spring.io/projects/spring-boot)
+
+## 📌 二次开发声明
+
+**JavaVision Plus 是 [javpower/JavaVision](https://github.com/javpower/JavaVision) 的二次开发（二开）增强版本，不是上游官方发行版。**
+
+识别算法、模型与核心业务流程沿用上游实现；本仓库在其基础上重做了持久层与文件存储，增加了推理设备动态决策与启动预热，统一了接口响应、错误码与链路追踪，并补充了接口文档与性能实测。原项目版权归其作者及贡献者所有，本项目同样以 [Apache License 2.0](LICENSE) 发布。
+
+| 项目 | 说明 |
+| --- | --- |
+| 上游仓库（原项目） | <https://github.com/javpower/JavaVision> |
+| 本仓库（二开增强） | <https://github.com/along2638/java-vision-plus> |
+| 差异范围 | 分叉点 `f4873ed`（2025-05-14，取自 Gitee 主线），此后全部改动可用 `git diff f4873ed..HEAD` 查看 |
+| 许可证 | Apache License 2.0，保留原 [LICENSE](LICENSE) 与版权声明 |
+
+> 为便于与上游对比差异、合并上游更新，**Java 包名 `com.github.javpower.javavision` 保持不变**；项目标识（Maven 坐标、应用名、jar 名）已统一为 `java-vision-plus`。
+
+### 二开增强了什么
+
+| 方向 | 内容 |
+| --- | --- |
+| 持久层 | 人脸库与图库元数据由 JSON 文件改为 PostgreSQL + MyBatis-Plus：幂等建表脚本、历史 JSON 自动导入、逻辑删除、图库分页 |
+| 文件存储 | 抽出 `StorageService`，人脸图与图库图存 MinIO 对象存储，未部署 MinIO 时自动回退本地磁盘 |
+| 推理设备 | 启动期按「产物 flavor ∩ 显卡与驱动版本」决策 CPU/GPU；`mvn package -Dgpu=true` 构建 CUDA 产物 |
+| 性能 | 模型常驻缓存 + 空推理预热（首个请求 3.3s → 0.96s）+ 推理线程数干预；修复 ONNX Runtime 双环境冲突 |
+| 缓存 | Redis 缓存人脸特征与图片向量（按 MD5），Redis 不可用时自动降级查库 |
+| 接口规范 | 统一 `ApiResult` / `PageResult` 与错误码、语义化 HTTP 状态码（可开关回退旧行为）、traceId 链路、参数校验、Swagger 中文文档 |
+| 新增接口 | `GET /system/status`（中间件与推理设备状态）、`POST /system/cache/clear`、`GET /image/list`（分页） |
+| 文档与工具 | [docs/API.md](docs/API.md)、[docs/PERF.md](docs/PERF.md)、`tools/` 下的打包重启与压测脚本 |
+
 ## 🪧 项目起源
 
-- JavaVision是一个基于Java开发的全能视觉智能识别项目。该项目起源于对图像处理和人工智能领域的热情，以及对Java作为主要编程语言的坚持。在AI领域，大多数解决方案都是使用Python实现的，因此决定充分利用Java的优势来构建一个功能强大且易于集成的视觉智能识别平台。
+- JavaVision（本项目在此基础上二开）是一个基于Java开发的全能视觉智能识别项目。该项目起源于对图像处理和人工智能领域的热情，以及对Java作为主要编程语言的坚持。在AI领域，大多数解决方案都是使用Python实现的，因此决定充分利用Java的优势来构建一个功能强大且易于集成的视觉智能识别平台。
 
   >JavaVision是完全开源、免费并支持多平台部署视觉智能识别项目
   >如果该项目对您有帮助，您的star是我不断优化的动力！！！
@@ -812,4 +841,6 @@ docker一键部署
 
 ## 开源许可
 
-使用 [Apache License 2.0](LICENSE)
+本项目以 [Apache License 2.0](LICENSE) 发布。
+
+JavaVision Plus 基于 [javpower/JavaVision](https://github.com/javpower/JavaVision) 二次开发，原项目及其贡献者的版权声明与许可条款同样适用于本项目，完整条款见 [LICENSE](LICENSE)。

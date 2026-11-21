@@ -14,7 +14,7 @@ public class TextImg {
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         g.setFont(new Font("SansSerif", Font.BOLD, 52));
         String[] lines = {
-                "JavaVision OCR Benchmark",
+                "JavaVision Plus OCR Benchmark",
                 "The quick brown fox jumps",
                 "over the lazy dog 1234567890",
                 "Invoice No. A-2026-1113",

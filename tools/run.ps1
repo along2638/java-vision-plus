@@ -1,4 +1,4 @@
-﻿# JavaVision 一键重启 / 构建运行
+﻿# JavaVision Plus 一键重启 / 构建运行
 #
 # 为什么需要它：
 #   应用直接以 `java -jar target/...jar` 运行时，Windows 会锁住该文件；
@@ -26,9 +26,9 @@ param(
 $ErrorActionPreference = 'Stop'
 
 $projectDir = Split-Path -Parent $PSScriptRoot
-$targetJar = Join-Path $projectDir 'target\JavaVision-0.0.1-SNAPSHOT.jar'
+$targetJar = Join-Path $projectDir 'target\java-vision-plus-0.0.1-SNAPSHOT.jar'
 $backupJar = "$targetJar.original"
-$runJar = Join-Path $RunDir 'JavaVision.jar'
+$runJar = Join-Path $RunDir 'java-vision-plus.jar'
 $logFile = Join-Path $RunDir 'app.log'
 $errFile = Join-Path $RunDir 'app.err.log'
 

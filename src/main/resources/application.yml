@@ -13,7 +13,7 @@ server:
 # spring配置
 spring:
   application:
-    name: JavaVision
+    name: java-vision-plus
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
@@ -34,7 +34,7 @@ spring:
     password: ${PG_PASSWORD:}
     driver-class-name: org.postgresql.Driver
     hikari:
-      pool-name: JavaVisionHikari
+      pool-name: java-vision-plus-hikari
       maximum-pool-size: 20
       minimum-idle: 5
       connection-timeout: 10000
@@ -100,6 +100,8 @@ minio:
   endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
   access-key: ${MINIO_ACCESS_KEY:}
   secret-key: ${MINIO_SECRET_KEY:***REMOVED***}
+  # 桶名沿用上游的 javavision：库里已存的图片地址都指向该桶，改名会导致历史图片全部失效。
+  # 需要独立桶时用 MINIO_BUCKET 覆盖，并自行迁移数据。
   bucket: ${MINIO_BUCKET:javavision}
   # 对外访问地址，容器内网地址与客户端访问地址不一致时单独配置
   public-url: ${MINIO_PUBLIC_URL:http://127.0.0.1:9000}
@@ -130,15 +132,15 @@ vision:
     legacy-http-status: ${LEGACY_HTTP_STATUS:false}
   # swagger配置
   openapi:
-    title: vision API Docs
-    description: vision接口文档
-    terms-of-service: https://javavision.com
+    title: JavaVision Plus API Docs
+    description: JavaVision Plus 接口文档 —— 基于 JavaVision 二次开发增强
+    terms-of-service: https://github.com/along2638/java-vision-plus
     contact-name: gc
     contact-url: https://vision.io
     contact-email: javpower@163.com
     version: 1.0
-    external-description: vision
-    external-url: https://vision
+    external-description: JavaVision Plus 源码
+    external-url: https://github.com/along2638/java-vision-plus
     packagedToMatch:
       - com.github.javpower.javavision.controller
 es:

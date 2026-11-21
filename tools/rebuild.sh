@@ -18,7 +18,7 @@ set -uo pipefail
 cd "$(dirname "$0")/.." || exit 1
 
 PORT="${PORT:-6888}"
-JAR="target/JavaVision-0.0.1-SNAPSHOT.jar"
+JAR="target/java-vision-plus-0.0.1-SNAPSHOT.jar"
 # 运行用副本：mvn clean 会删 target，别人（或 IDE、并行会话）打包时，
 # 从 target 里正在运行的 jar 会被删除/重写，进程必挂。副本放在 .run/，clean 碰不到。
 RUNTIME_DIR=".run"
