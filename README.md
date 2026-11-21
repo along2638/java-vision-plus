@@ -1,6 +1,6 @@
 # JavaVision
-[![GitHub stars](https://img.shields.io/github/stars/javpower/JavaVision.svg)](https://github.com/javpower/JavaVision)
-[![GitHub issues](https://img.shields.io/github/issues/javpower/JavaVision.svg)](https://github.com/javpower/JavaVision/issues)
+[![GitHub stars](https://img.shields.io/github/stars/along2638/java-vision-plus.svg)](https://github.com/along2638/java-vision-plus)
+[![GitHub issues](https://img.shields.io/github/issues/along2638/java-vision-plus.svg)](https://github.com/along2638/java-vision-plus/issues)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java Version](https://img.shields.io/badge/java-1.8+-orange.svg)](https://adoptopenjdk.net/)
 [![Spring Boot](https://img.shields.io/badge/spring--boot-blue.svg)](https://spring.io/projects/spring-boot)
@@ -812,4 +812,4 @@ docker一键部署
 
 ## 开源许可
 
-使用 [Apache License 2.0](https://gitee.com/giteeClass/java-vision/raw/master/LICENSE)
+使用 [Apache License 2.0](LICENSE)
