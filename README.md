@@ -17,7 +17,7 @@
 | --- | --- |
 | 上游仓库（原项目） | <https://github.com/javpower/JavaVision> |
 | 本仓库（二开增强） | <https://github.com/along2638/java-vision-plus> |
-| 差异范围 | 分叉点 `f4873ed`（2025-05-14，取自 Gitee 主线），此后全部改动可用 `git diff f4873ed..HEAD` 查看 |
+| 差异范围 | 分叉点 `0e02b30`（2025-05-14，取自 Gitee 主线），此后全部改动可用 `git diff 0e02b30..HEAD` 查看 |
 | 许可证 | Apache License 2.0，保留原 [LICENSE](LICENSE) 与版权声明 |
 
 > 为便于与上游对比差异、合并上游更新，**Java 包名 `com.github.javpower.javavision` 保持不变**；项目标识（Maven 坐标、应用名、jar 名）已统一为 `java-vision-plus`。
