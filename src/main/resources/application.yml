@@ -185,10 +185,12 @@ config:
 #  address: "127.0.0.1:6379" # Redis地址
 #  password: "" # Redis密码
 
+# 上游遗留的 jedis 配置段：当前代码走 spring.redis（Lettuce），此处仅为兼容保留，
+# 同样不写死任何地址与密码
 jedis:
   nodes:
-    - ${REDIS_HOST:127.0.0.1}:${REDIS_PORT:16377}
-  password: ${REDIS_PASSWORD:***REMOVED***}
+    - ${REDIS_HOST:127.0.0.1}:${REDIS_PORT:6379}
+  password: ${REDIS_PASSWORD:}
   pool:
     minIdle: 64
     maxIdle: 64
