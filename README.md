@@ -3,7 +3,9 @@
 [![GitHub issues](https://img.shields.io/github/issues/along2638/java-vision-plus.svg)](https://github.com/along2638/java-vision-plus/issues)
 [![Apache License 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 [![Java Version](https://img.shields.io/badge/java-1.8+-orange.svg)](https://adoptopenjdk.net/)
-[![Spring Boot](https://img.shields.io/badge/spring--boot-blue.svg)](https://spring.io/projects/spring-boot)
+[![Spring Boot](https://img.shields.io/badge/spring--boot-2.7.12-green.svg)](https://spring.io/projects/spring-boot)
+
+基于 Java 的视觉推理服务：OCR、目标检测、人脸识别、以图搜图，一个 `java -jar` 即可启动。
 
 ## 📌 二次开发声明
 
@@ -35,809 +37,172 @@
 
 ## 🪧 项目起源
 
-- JavaVision（本项目在此基础上二开）是一个基于Java开发的全能视觉智能识别项目。该项目起源于对图像处理和人工智能领域的热情，以及对Java作为主要编程语言的坚持。在AI领域，大多数解决方案都是使用Python实现的，因此决定充分利用Java的优势来构建一个功能强大且易于集成的视觉智能识别平台。
+- JavaVision（本项目在此基础上二开）是一个基于 Java 开发的全能视觉智能识别项目。该项目起源于对图像处理和人工智能领域的热情，以及对 Java 作为主要编程语言的坚持。在 AI 领域，大多数解决方案都是使用 Python 实现的，因此决定充分利用 Java 的优势来构建一个功能强大且易于集成的视觉智能识别平台。
 
-  >JavaVision是完全开源、免费并支持多平台部署视觉智能识别项目
-  >如果该项目对您有帮助，您的star是我不断优化的动力！！！
-  >免费使用 OCR，https://ocr.m78cloud.cn
+  > JavaVision 是完全开源、免费并支持多平台部署的视觉智能识别项目。
 
+## 👏 功能特性
 
+- **OCR 文字识别**：RapidOcr（JNI）与 DJL（PP-OCRv4）两条链路，均可返回纯文本或带坐标、置信度的结构化数组
+- **目标检测**：YOLOv8 通用物体识别，以及火焰烟雾、反光衣、安全帽三个专项模型
+- **人脸识别**：`/face` 基于虹软算法提取特征 + PostgreSQL 存储，支持 1:N 检索；`/arc/soft/face` 为虹软 SDK + Milvus 的独立实现
+- **以图搜图**：向量库可切换，默认 `vectorex`，也支持 `milvus`、`es`（`image.service` 配置）
+- **工程能力**：CPU/GPU 双产物、启动预热、模型常驻、Redis 缓存降级、统一响应与 traceId 链路
 
-## 👏 项目特点
+## 🚀 快速开始
 
-JavaVision具有以下突出特点：
+### 1. 环境要求
 
-- 框架: SpringBoot
+| 依赖 | 版本 | 是否必需 |
+| --- | --- | --- |
+| JDK | 8+（实测构建用 11，编译目标 1.8） | 必需 |
+| Maven | 3.6+ | 构建时必需 |
+| PostgreSQL | 12+ | **必需**，人脸库与图库元数据 |
+| Redis | 5+ | 可选，缓存不可用时自动查库 |
+| MinIO | 任意较新版本 | 可选，`minio.enabled=false` 回退本地磁盘 |
+| Milvus / Elasticsearch | — | 可选，仅在对应向量库实现下需要 |
 
-- 多功能性：JavaVision不仅实现PaddleOCR-V4、YoloV8物体识别、人脸识别、以图搜图等核心功能，还可以轻松扩展到其他领域，如语音识别、动物识别、安防检查等。这使得JavaVision成为一个全面解决多种场景需求的自适应平台。
+模型文件与各平台原生库已随仓库提供（`src/main/resources`，约 665MB），无需额外下载。
 
-- 高性能：JavaVision经过精心优化，具备卓越的性能表现。通过巧妙地结合算法优化和多线程技术，JavaVision能够在短时间内处理大量复杂的图像数据，并快速准确地进行识别和分析。
+### 2. 构建
 
-- 可靠稳定：Java作为一种成熟而可靠的编程语言，具备出色的稳定性和安全性。JavaVision严格遵循最佳实践和高标准，确保项目的稳定运行，并提供可靠的数据保护和隐私保密。
+```bash
+# CPU 产物（默认，按构建机平台自动选择 win-x86_64 / linux-x86_64 原生库）
+mvn clean package
 
-- 易于集成：JavaVision提供简洁而强大的API接口，使得与其他系统和平台的集成变得轻松快捷。无论是嵌入到现有应用程序中，还是作为独立的服务进行部署，JavaVision都能够与各种技术栈和框架无缝衔接。
+# GPU 产物：CUDA 12.1，体积更大，需要构建机安装对应 toolchain
+mvn clean package -Dgpu=true
 
-- 灵活可拓展：JavaVision采用模块化设计，允许用户根据自己的需求进行灵活的定制和扩展。用户可以根据项目需求选择合适的功能模块，也可以通过插件机制添加新的识别算法和特性。
-
-  > JavaVision旨在为Java开发者提供一个全面的视觉智能识别解决方案，让他们能够以熟悉且喜爱的编程语言构建出先进、可靠且易于集成的AI应用。无论是企业级应用还是个人项目，JavaVision都能助力开发者实现更多可能性
-
-## 🔝 进阶使用
-
-docker一键部署
-
-- docker pull javpower/pdocr:v4.0.1
-- docker run --name mycontainer -p 6888:6888 javpower/pdocr:v4.0.1
-
->   <img src="./docs/img/pdocr.png" style="zoom:100%;" />
-
-
-
-## 🔝 项目API
-
-### 一、OCR应用
-
-#### 1、YOLOV8识别物体
-
-**接口地址**:`/yolo8`
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-{
-    "code": 500,
-    "success": false,
-    "msg": "java.io.FileNotFoundException: /opt/ocr/20231109151816332402394.png (No such file or directory)",
-    "data": null,
-    "time": "2023-11-09 15:18:16",
-    "traceId": null
-}
+# 在 Windows 上打 Linux GPU 包
+mvn clean package -Dgpu=true -Dgpu.native.classifier=linux-x86_64
 ```
 
-#### 2、YOLOV8识别物体
+产物：`target/java-vision-plus-0.0.1-SNAPSHOT.jar`（约 966MB，含模型与原生库）。
 
+> 构建期会向 `inference-flavor.properties` 写入 `cpu` 或 `cu121`，启动时由 `InferenceDevice` 读取，
+> 与显卡探测结果取交集决定实际设备。CPU 产物在任何机器上都不会启用 GPU。
 
-**接口地址**:`/yolo8/json`
+### 3. 启动
 
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema    |
-| ------ | ---- | --------- |
-| 200    | OK   | Detection |
-
-
-**响应参数**:
-
-
-| 参数名称   | 参数说明 | 类型           | schema         |
-| ---------- | -------- | -------------- | -------------- |
-| label      |          | string         |                |
-| clsId      |          | integer(int32) | integer(int32) |
-| bbox       |          | array          |                |
-| confidence |          | number(float)  | number(float)  |
-
-
-**响应示例**:
-
-```javascript
-[
-	{
-		"label": "",
-		"clsId": 0,
-		"bbox": [],
-		"confidence": 0
-	}
-]
+```bash
+java -Xms1g -Xmx2g -jar target/java-vision-plus-0.0.1-SNAPSHOT.jar
 ```
 
-#### 3、DJL识别文字
+堆内存建议显式指定：模型常驻的是堆外内存（约 280MB），但 `-Xmx` 不限制时 JVM 会按物理内存的 1/4 取值，内存紧张时被换页会让单请求从 0.7s 退化到 2s 以上。
 
+仓库自带两个启动脚本，用于规避「实例运行中打包导致 jar 被锁、repackage 失败」的问题（脚本会把产物复制到独立目录再运行）：
 
-**接口地址**:`/word`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
+```powershell
+# Windows：用现有产物重启；-Build 表示先 mvn clean package
+.\tools\run.ps1
+.\tools\run.ps1 -Build
 ```
 
-#### 4、DJL识别文字
-
-
-**接口地址**:`/word/json`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema    |
-| ------ | ---- | --------- |
-| 200    | OK   | WordBlock |
-
-
-**响应参数**:
-
-
-| 参数名称      | 参数说明 | 类型           | schema |
-| ------------- | -------- | -------------- | ------ |
-| text          |          | string         |        |
-| charScores    |          | array          |        |
-| boxPoint      |          | array          | Point  |
-| &emsp;&emsp;x |          | number(double) |        |
-| &emsp;&emsp;y |          | number(double) |        |
-
-
-**响应示例**:
-
-```javascript
-[
-	{
-		"text": "",
-		"charScores": [],
-		"boxPoint": [
-			{
-				"x": 0,
-				"y": 0
-			}
-		]
-	}
-]
+```bash
+# Linux：停服务 → 打包 → 校验清单 → 启动
+./tools/rebuild.sh
+./tools/rebuild.sh -Dgpu=true
 ```
 
-#### 5、反光衣检测
+### 4. 验证
 
+| 地址 | 说明 |
+| --- | --- |
+| `http://localhost:6888/system/status` | 中间件连接、推理设备、预热状态、模型清单 |
+| `http://localhost:6888/doc.html` | knife4j 在线接口文档 |
+| `http://localhost:6888/v3/api-docs` | OpenAPI 3 原始描述 |
 
-**接口地址**:`/reflective/json`
+`/system/status` 中 `inference.warmup.state` 变为"完成"后再接流量，可保证第一个真实请求就落在稳态耗时。
 
+## ⚙️ 配置
 
-**请求方式**:`POST`
+所有中间件连接均可用环境变量覆盖，`application.yml` 里的默认值是内网测试环境，**生产部署必须覆盖**（仓库公开时建议把默认值清空）。
 
+| 变量 | 默认值 | 说明 |
+| --- | --- | --- |
+| `PG_HOST` / `PG_PORT` / `PG_DB` | `127.0.0.1` / `5432` / `java_vision` | PostgreSQL 连接 |
+| `PG_USER` / `PG_PASSWORD` | `postgres` / `postgres` | 数据库账号 |
+| `REDIS_HOST` / `REDIS_PORT` / `REDIS_DB` | `127.0.0.1` / `16377` / `0` | Redis 连接 |
+| `REDIS_PASSWORD` | — | Redis 密码 |
+| `MINIO_ENDPOINT` / `MINIO_PUBLIC_URL` | `http://127.0.0.1:9000` | MinIO 内网地址与对外访问地址 |
+| `MINIO_ACCESS_KEY` / `MINIO_SECRET_KEY` | — | MinIO 凭证 |
+| `MINIO_BUCKET` | `javavision` | 桶名，沿用上游以免历史图片地址失效 |
+| `MILVUS_URI` / `MILVUS_TOKEN` | 上游测试实例 / 空 | 虹软人脸与 `image.service=milvus` 时需要 |
+| `LEGACY_HTTP_STATUS` | `false` | `true` 时异常也返回 HTTP 200，用于兼容老前端 |
+| `INFERENCE_THREADS` | `0` | 推理线程数，`0` 表示不干预（引擎默认＝逻辑核数） |
+| `LOG_HOME` | `logs` | 日志目录，容器部署建议挂盘 |
 
-**请求数据类型**:`multipart/form-data`
+其他行为开关在 `application.yml`：
 
+- `vision.inference.warmup.enabled` / `async` / `predict`：启动预热，默认开启并异步、加载后空跑一次
+- `minio.enabled`：`false` 时文件存本地磁盘，行为与改造前一致
+- `image.service`：以图搜图实现，`vectorex`（默认）/ `milvus` / `es`
+- `es.enable`：未部署 Elasticsearch 时保持 `false`
 
-**响应数据类型**:`*/*`
+**数据库初始化**：启动时自动执行 `classpath:db/schema-pg.sql`（幂等 DDL，表与索引不存在才创建），无需手工建表。历史版本存放在 `image/face/{personId}.json` 的人脸数据，会在首次启动（人员表为空）时自动导入 PostgreSQL，原 JSON 保留作备份。
 
-
-**接口描述**:
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
+## 🧩 模块结构
 
 ```
-
-#### 6、JNI识别文字
-
-
-**接口地址**:`/ocr`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称               | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema   |
-| ---------------------- | -------- | -------- | -------- | -------- | -------- |
-| param                  |          | query    | true     | OcrParam | OcrParam |
-| &emsp;&emsp;openAi-key |          |          | false    | string   |          |
-| &emsp;&emsp;描述词     |          |          | false    | array    | string   |
-| file                   |          | query    | true     | file     |          |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
+com.github.javpower.javavision
+├── controller/    REST 接口（人脸、图库、OCR/检测、系统状态、虹软）
+├── service/       业务编排：人脸库、图库元数据、向量提取、统一 OCR/检测入口
+├── db/            MyBatis-Plus 实体 / Mapper / TypeHandler / 启动迁移
+├── storage/       文件存储抽象：MinIO 与本地磁盘两种实现
+├── cache/         Redis 访问门面（失败降级，日志节流）
+├── config/        启动预热、MinIO 配置、MyBatis-Plus 配置
+├── util/          推理设备决策、推理线程数、模型缓存、文件与图像工具
+├── detect/        DJL Translator（检测、识别、特征提取、OCR 后处理）
+├── milvus/ vectorex/ es/   三套向量库实现，接口一致可切换
+├── arcsoft/       虹软人脸 SDK 封装
+└── framework/     统一响应、全局异常、TraceId 过滤、OpenAPI 定制、CORS
 ```
 
-#### 7、JNI识别文字
-
-
-**接口地址**:`/ocr/json`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema    |
-| ------ | ---- | --------- |
-| 200    | OK   | TextBlock |
-
-
-**响应参数**:
-
-
-| 参数名称      | 参数说明 | 类型           | schema         |
-| ------------- | -------- | -------------- | -------------- |
-| boxPoint      |          | array          | Point          |
-| &emsp;&emsp;x |          | number(double) |                |
-| &emsp;&emsp;y |          | number(double) |                |
-| boxScore      |          | number(float)  | number(float)  |
-| angleIndex    |          | integer(int32) | integer(int32) |
-| angleScore    |          | number(float)  | number(float)  |
-| angleTime     |          | number(double) | number(double) |
-| text          |          | string         |                |
-| charScores    |          | array          |                |
-| crnnTime      |          | number(double) | number(double) |
-| blockTime     |          | number(double) | number(double) |
-
-
-**响应示例**:
-
-```javascript
-[
-	{
-		"boxPoint": [
-			{
-				"x": 0,
-				"y": 0
-			}
-		],
-		"boxScore": 0,
-		"angleIndex": 0,
-		"angleScore": 0,
-		"angleTime": 0,
-		"text": "",
-		"charScores": [],
-		"crnnTime": 0,
-		"blockTime": 0
-	}
-]
-```
-
-#### 8、火焰检测
-
-
-**接口地址**:`/fire/json`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
-
-#### 9、安全帽检测
-
-
-**接口地址**:`/construction/json`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
-
-### 二、人脸应用
-
-#### 1、更新人脸
-
-
-**接口地址**:`/face/update`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称                 | 参数说明 | 请求类型 | 是否必须 | 数据类型  | schema    |
-| ------------------------ | -------- | -------- | -------- | --------- | --------- |
-| param                    |          | query    | true     | FaceParam | FaceParam |
-| &emsp;&emsp;人员唯一标识 |          |          | true     | string    |           |
-| &emsp;&emsp;人员名称     |          |          | true     | string    |           |
-| file                     |          | query    | true     | file      |           |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
-
-#### 2、人脸查询
-
-
-**接口地址**:`/face/search`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema       |
-| ------ | ---- | ------------ |
-| 200    | OK   | PersonObject |
-
-
-**响应参数**:
-
-
-| 参数名称   | 参数说明 | 类型   | schema |
-| ---------- | -------- | ------ | ------ |
-| personId   |          | string |        |
-| personName |          | string |        |
-
-
-**响应示例**:
-
-```javascript
-{
-	"personId": "",
-	"personName": ""
-}
-```
-
-#### 3、删除人脸
-
-
-**接口地址**:`/face/del`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`application/x-www-form-urlencoded`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称                 | 参数说明 | 请求类型 | 是否必须 | 数据类型  | schema    |
-| ------------------------ | -------- | -------- | -------- | --------- | --------- |
-| param                    |          | query    | true     | FaceParam | FaceParam |
-| &emsp;&emsp;人员唯一标识 |          |          | true     | string    |           |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
-
-
-> #### 4、添加人脸
-
-
-**接口地址**:`/face/add`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称                 | 参数说明 | 请求类型 | 是否必须 | 数据类型  | schema    |
-| ------------------------ | -------- | -------- | -------- | --------- | --------- |
-| param                    |          | query    | true     | FaceParam | FaceParam |
-| &emsp;&emsp;人员唯一标识 |          |          | true     | string    |           |
-| &emsp;&emsp;人员名称     |          |          | true     | string    |           |
-| file                     |          | query    | true     | file      |           |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
-### 三、以图搜图应用（ES版本）
-
-#### 1、搜图
-
-
-**接口地址**:`/image/search`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称 | 参数说明 | 请求类型 | 是否必须 | 数据类型 | schema |
-| -------- | -------- | -------- | -------- | -------- | ------ |
-| file     |          | query    | true     | file     |        |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema       |
-| ------ | ---- | ------------ |
-| 200    | OK   |  |
-
-
-> #### 2、添加图片
-
-
-**接口地址**:`/image/add`
-
-
-**请求方式**:`POST`
-
-
-**请求数据类型**:`multipart/form-data`
-
-
-**响应数据类型**:`*/*`
-
-
-**接口描述**:
-
-
-**请求参数**:
-
-
-| 参数名称               | 参数说明 | 请求类型 | 是否必须 | 数据类型  | schema    |
-|--------------------| -------- | -------- | -------- | --------- | --------- |
-| imageId            |          | query    | true     | string |  |
-| file               |          | query    | true     | file      |           |
-
-
-**响应状态**:
-
-
-| 状态码 | 说明 | schema |
-| ------ | ---- | ------ |
-| 200    | OK   |        |
-
-
-**响应参数**:
-
-
-暂无
-
-
-**响应示例**:
-
-```javascript
-
-```
+## 🔌 接口一览
+
+所有接口返回统一结构 `ApiResult`：`{ code, success, msg, data, time }`，异常由全局处理器包装，响应头带 `X-Trace-Id`。图片上传统一为 `multipart/form-data`，文件字段名固定 `file`，单文件上限 20MB。字段说明、请求示例与错误码见 **[docs/API.md](docs/API.md)**。
+
+| 模块 | 方法 | 路径 | 说明 |
+| --- | --- | --- | --- |
+| 人脸 | POST | `/face/add` | 添加人脸（图片入库 + 特征提取） |
+| 人脸 | POST | `/face/update` | 更新人脸，personId 不存在时按新增处理 |
+| 人脸 | POST | `/face/del` | 删除人脸（逻辑删除，保留审计） |
+| 人脸 | POST | `/face/search` | 1:N 检索，返回最相似人员 |
+| 人脸 | GET | `/face/list` | 人脸库列表 |
+| 图库 | POST | `/image/add` | 图片入库（元数据 + 向量） |
+| 图库 | POST | `/image/search` | 以图搜图，返回相似度排序结果 |
+| 图库 | POST | `/image/del` | 删除图片（逻辑删除） |
+| 图库 | GET | `/image/list` | 图库分页列表 |
+| OCR | POST | `/ocr` `/ocr/json` | RapidOcr：纯文本 / 结构化文本块 |
+| OCR | POST | `/word` `/word/json` | DJL PP-OCRv4：纯文本 / 结构化文本块 |
+| 检测 | POST | `/yolo8` `/yolo8/json` | YOLOv8 通用物体识别 |
+| 检测 | POST | `/fire/json` | 火焰烟雾检测 |
+| 检测 | POST | `/reflective/json` | 反光衣检测 |
+| 检测 | POST | `/construction/json` | 安全帽检测 |
+| 系统 | GET | `/system/status` | 中间件连接、推理设备、预热状态 |
+| 系统 | POST | `/system/cache/clear` | 清理人脸特征与图片向量缓存 |
+| 虹软 | POST | `/arc/soft/face/add` `/update` `/del` `/search` | 虹软 SDK + Milvus 的独立人脸库实现 |
+
+## 📈 性能与容量
+
+实测环境：20 vCPU、CPU 产物、`POST /word/json`。完整数据与压测方法见 **[docs/PERF.md](docs/PERF.md)**。
+
+| 指标 | 数值 |
+| --- | --- |
+| 首个请求耗时 | 3.30s（仅加载模型）→ **0.96s**（加载 + 空推理） |
+| 稳态耗时 | 约 0.64s |
+| 单请求 CPU 时间 | 约 **6.93 CPU·s**（平均占用 9.5 核） |
+| 单实例吞吐 | 20 核下约 1.5~1.8 req/s |
+
+结论：CPU 推理的吞吐天花板由单请求 CPU 量决定，调线程数只能改变排队方式；要提高吞吐就加实例或改用 `-Dgpu=true` 的 GPU 产物。
+
+## 📚 文档
+
+| 文档 | 内容 |
+| --- | --- |
+| [docs/API.md](docs/API.md) | 24 个接口的完整说明：参数、响应、错误码、字段含义 |
+| [docs/PERF.md](docs/PERF.md) | 推理性能实测：预热效果、CPU 用量、并发表现、部署建议 |
+| `/doc.html` | 运行期在线文档，与代码注解同源 |
 
 ## 开源许可
 
