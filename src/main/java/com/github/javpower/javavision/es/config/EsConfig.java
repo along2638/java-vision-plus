@@ -15,6 +15,7 @@ import org.elasticsearch.client.indices.CreateIndexRequest;
 import org.elasticsearch.client.indices.GetIndexRequest;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.xcontent.XContentType;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,6 +28,7 @@ import java.util.Arrays;
 @Component
 @Configuration
 @ConfigurationProperties(prefix = "es")
+@ConditionalOnProperty(prefix = "es", name = "enable", havingValue = "true", matchIfMissing = true)
 public class EsConfig {
 	public static final RequestOptions COMMON_OPTIONS;
 

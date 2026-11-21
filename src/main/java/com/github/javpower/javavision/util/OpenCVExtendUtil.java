@@ -51,11 +51,10 @@ public class OpenCVExtendUtil {
             extractNativeBinaryMethod.setAccessible(true);
             // 调用 extractNativeBinary 方法并获取结果
             Path binaryPath = (Path) extractNativeBinaryMethod.invoke(null);  // 调用静态方法，传递 null 作为实例
-            log.info("OpenCVUtil 路径为: " + binaryPath);
+            log.info("OpenCVUtil 路径为: {}", binaryPath);
             return  binaryPath;
         } catch (Exception e) {
-            log.error(e.getMessage());
-            e.printStackTrace();
+            log.error("解析 OpenCV 原生库路径失败", e);
         }
         return null;
     }

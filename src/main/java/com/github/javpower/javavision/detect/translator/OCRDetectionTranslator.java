@@ -106,6 +106,12 @@ public class OCRDetectionTranslator implements Translator<Image, NDList> {
 
         NDArray boxes = boxes_from_bitmap(manager, pred, newMask);
 
+        // 图中没有检测到文本框时直接返回空结果，避免后续切片与 stack 报错
+        if (boxes == null) {
+            newMask.release();
+            return new NDList();
+        }
+
         //boxes[:, :, 0] = boxes[:, :, 0] / ratio_w
         NDArray boxes1 = boxes.get(":, :, 0").div(ratio_w);
         boxes.set(new NDIndex(":, :, 0"), boxes1);
@@ -253,6 +259,14 @@ public class OCRDetectionTranslator implements Translator<Image, NDList> {
             // release memory
             contour.release();
             newContour.release();
+        }
+
+        // 没有候选框时返回 null，由调用方提前返回空结果。
+        // 注意不能用 zeros(0,4,2)：ONNX Runtime 不支持 0 长度张量，会抛
+        // UnsupportedOperationException: OnnxRuntime doesn't support 0 length tensor
+        if (boxList.isEmpty()) {
+            hierarchy.release();
+            return null;
         }
 
         NDArray boxes = NDArrays.stack(boxList);

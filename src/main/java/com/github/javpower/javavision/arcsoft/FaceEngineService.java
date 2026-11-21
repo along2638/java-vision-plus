@@ -24,8 +24,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 @Service
 @Slf4j
@@ -42,8 +40,6 @@ public class FaceEngineService {
 
     @Value("${config.arcface-sdk.compare-pool-size}")
     public Integer comparePooSize;
-
-    private ExecutorService compareExecutorService;
 
     //通用人脸识别引擎池
     private GenericObjectPool<FaceEngine> faceEngineGeneralPool;
@@ -82,7 +78,6 @@ public class FaceEngineService {
         compareCfg.setDetectMode(DetectMode.ASF_DETECT_MODE_IMAGE);//图片检测模式，如果是连续帧的视频流图片，那么改成VIDEO模式
         compareCfg.setDetectFaceOrientPriority(DetectOrient.ASF_OP_0_ONLY);//人脸旋转角度
         faceEngineComparePool = new GenericObjectPool(new FaceEngineFactory(appId, sdkKey, null,compareCfg), comparePoolConfig);//底层库算法对象池
-        compareExecutorService = Executors.newFixedThreadPool(comparePooSize);
     }
 
 

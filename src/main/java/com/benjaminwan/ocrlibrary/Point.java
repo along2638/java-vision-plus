@@ -1,9 +1,18 @@
 package com.benjaminwan.ocrlibrary;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.Objects;
 
+/**
+ * 图像坐标点（像素）。
+ */
+@Schema(description = "二维坐标点（像素）")
 public class Point {
+    @Schema(description = "横坐标，单位像素", example = "120")
     private int x;
+
+    @Schema(description = "纵坐标，单位像素", example = "240")
     private int y;
 
     public Point(int x, int y) {

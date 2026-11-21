@@ -1,12 +1,14 @@
 package com.github.javpower.javavision.framework.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.github.javpower.javavision.framework.constant.CommonConstant;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.MDC;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -41,6 +43,13 @@ public class ApiResult<T> implements Serializable {
     @Schema(description = "响应时间")
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date time;
+
+    /**
+     * 本次请求的链路追踪 ID，与响应头 X-Trace-Id 一致。
+     * 排查线上问题时把它提供给后端，可直接定位到对应请求的全部日志。
+     */
+    @Schema(description = "链路追踪 ID，反馈问题时请提供", example = "9f2c1d7a4b6e4c0f8a1b2c3d4e5f6071")
+    private String traceId;
 
 
     public static ApiResult success() {
@@ -106,6 +115,7 @@ public class ApiResult<T> implements Serializable {
                 .data(data)
                 .success(success)
                 .time(new Date())
+                .traceId(MDC.get(CommonConstant.TRACE_ID))
                 .build();
     }
 

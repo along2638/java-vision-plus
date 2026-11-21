@@ -18,6 +18,22 @@
         <maven.compiler.target>1.8</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <djl.version>0.27.0</djl.version>
+        <!-- 与 pytorch-engine 0.27.0 匹配的原生库版本 -->
+        <pytorch.native.version>2.1.1</pytorch.native.version>
+        <!--
+          推理产物类型，会被写入 classpath 下的 inference-flavor.properties，
+          供启动期决策读取。默认 cpu；执行 mvn package -Dgpu=true 时变为 cu121。
+          注意：torch 2.1.1 只有 cu121 这一条 CUDA 分支（cu118 最高只到 2.0.x）。
+        -->
+        <inference.flavor>cpu</inference.flavor>
+        <!--
+          GPU 产物打进去的原生库平台。默认跟随构建机，需要跨平台打包时用命令行覆盖：
+            mvn package -Dgpu=true -Dgpu.native.classifier=linux-x86_64
+          这样在 Windows 开发机上也能产出可直接部署到 Linux 服务器的 GPU 包。
+        -->
+        <gpu.native.classifier>win-x86_64</gpu.native.classifier>
+        <!-- MyBatis-Plus 3.5.3.x 对应 Spring Boot 2.x（Boot 3 需改用 mybatis-plus-spring-boot3-starter） -->
+        <mybatis-plus.version>3.5.3.2</mybatis-plus.version>
     </properties>
     <dependencies>
 
@@ -38,6 +54,11 @@
                     <artifactId>elasticsearch</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+        <!-- JSR-303 参数校验：hibernate-validator + tomcat-embed-el，Controller 入参校验依赖它 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
         <dependency>
             <groupId>com.github.xiaoymin</groupId>
@@ -94,12 +115,6 @@
             <scope>provided</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.apache.logging.log4j</groupId>
-            <artifactId>log4j-slf4j-impl</artifactId>
-            <version>2.20.0</version>
-            <scope>provided</scope>
-        </dependency>
 
         <dependency>
             <groupId>cn.hutool</groupId>
@@ -161,6 +176,8 @@
             <artifactId>onnxruntime-engine</artifactId>
             <version>${djl.version}</version>
         </dependency>
+        <!-- PyTorch 原生库（CPU 版）按平台在 profiles 中引入，
+             预置后可避免运行期从 djl.ai 下载 2GB CUDA 库导致卡死 -->
         <!--es-->
         <dependency>
             <groupId>org.elasticsearch.client</groupId>
@@ -223,10 +240,44 @@
             <version>5.2.0-beta5</version>
         </dependency>
 
+        <!-- MinIO 对象存储 -->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>8.5.7</version>
+        </dependency>
+
+        <!-- PostgreSQL：人脸特征、图库元数据等业务数据持久化 -->
+        <!-- 持久层使用 MyBatis-Plus，已移除 spring-boot-starter-data-jpa，避免两套 ORM 争用同一批表 -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <version>${mybatis-plus.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.3</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Redis：人脸特征、图片特征向量缓存（Lettuce 客户端） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>io.github.javpower</groupId>
             <artifactId>vectorex-starter</artifactId>
             <version>1.5.2</version>
+            <exclusions>
+                <!-- vectorex-keynote 依赖 slf4j-simple，与 spring-boot 默认的 logback 冲突 -->
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-simple</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
 
@@ -265,7 +316,125 @@
                 <includes>
                     <include>**/*.*</include>
                 </includes>
+                <!-- 该文件单独走过滤，避免开启全局过滤时对几百 MB 的模型文件做占位符扫描 -->
+                <excludes>
+                    <exclude>inference-flavor.properties</exclude>
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+                <includes>
+                    <include>inference-flavor.properties</include>
+                </includes>
             </resource>
         </resources>
     </build>
+
+    <!--
+      原生库按平台 + 推理产物类型分组：
+        - 默认（不传参）    → CPU 版原生库，产物行为与之前完全一致
+        - mvn package -Dgpu=true → CUDA 版原生库（cu121），产物具备 GPU 能力
+      CPU 侧 profile 上带 <property><name>!gpu</name></property>，
+      表示"gpu 属性未定义时才激活"，因此 -Dgpu=true 时两套原生库不会同时进入 classpath
+      （同名 torch 动态库只能存在一套，否则 DJL 选到哪个是不确定的）。
+
+      说明：这里只决定"产物能不能用 GPU"。运行时到底用不用，由 InferenceDevice
+      在启动阶段结合显卡探测结果决定，见 com.github.javpower.javavision.util.InferenceDevice。
+    -->
+    <profiles>
+        <profile>
+            <id>native-win</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+                <property>
+                    <name>!gpu</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.djl.pytorch</groupId>
+                    <artifactId>pytorch-native-cpu</artifactId>
+                    <version>${pytorch.native.version}</version>
+                    <classifier>win-x86_64</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>native-linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+                <property>
+                    <name>!gpu</name>
+                </property>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.djl.pytorch</groupId>
+                    <artifactId>pytorch-native-cpu</artifactId>
+                    <version>${pytorch.native.version}</version>
+                    <classifier>linux-x86_64</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+
+        <!-- ===== GPU 产物：mvn package -Dgpu=true ===== -->
+        <profile>
+            <id>gpu-win</id>
+            <activation>
+                <os>
+                    <family>windows</family>
+                </os>
+                <property>
+                    <name>gpu</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <inference.flavor>cu121</inference.flavor>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.djl.pytorch</groupId>
+                    <artifactId>pytorch-native-cu121</artifactId>
+                    <version>${pytorch.native.version}</version>
+                    <classifier>${gpu.native.classifier}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+        <profile>
+            <id>gpu-linux</id>
+            <activation>
+                <os>
+                    <family>unix</family>
+                    <name>Linux</name>
+                </os>
+                <property>
+                    <name>gpu</name>
+                    <value>true</value>
+                </property>
+            </activation>
+            <properties>
+                <inference.flavor>cu121</inference.flavor>
+                <gpu.native.classifier>linux-x86_64</gpu.native.classifier>
+            </properties>
+            <dependencies>
+                <dependency>
+                    <groupId>ai.djl.pytorch</groupId>
+                    <artifactId>pytorch-native-cu121</artifactId>
+                    <version>${pytorch.native.version}</version>
+                    <classifier>${gpu.native.classifier}</classifier>
+                    <scope>runtime</scope>
+                </dependency>
+            </dependencies>
+        </profile>
+    </profiles>
 </project>

@@ -6,8 +6,6 @@ import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
 import ai.djl.modality.cv.output.BoundingBox;
 import ai.djl.modality.cv.output.DetectedObjects;
-import ai.djl.repository.zoo.Criteria;
-import ai.djl.repository.zoo.ModelZoo;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 import com.github.javpower.javavision.detect.ConstructionDetect;
@@ -44,9 +42,10 @@ public class ConstructionDetectUtil {
     //    arguments.put("normalize", "false");
     arguments.put("threshold", 0.2);
     arguments.put("nmsThreshold", 0.5);
-    Criteria<Image, DetectedObjects> criteria = new ConstructionDetect(arguments).criteria();
-    try (ZooModel model = ModelZoo.loadModel(criteria);
-        Predictor<Image, DetectedObjects> predictor = model.newPredictor()) {
+    ConstructionDetect detect = new ConstructionDetect(arguments);
+    // 模型只加载一次，Predictor 每次请求新建（translator 绑定了图片尺寸）
+    ZooModel<Image, DetectedObjects> model = DjlModelUtil.getModel(detect.modelName, detect.criteria());
+    try (Predictor<Image, DetectedObjects> predictor = model.newPredictor(detect.translator())) {
       DetectedObjects detections = predictor.predict(image);
       List<DetectedObjects.DetectedObject> items = detections.items();
       List<String> names = new ArrayList<>();

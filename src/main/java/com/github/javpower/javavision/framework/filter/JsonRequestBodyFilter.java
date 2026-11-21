@@ -36,7 +36,7 @@ public class JsonRequestBodyFilter implements Filter {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.warn("缓存请求体失败，按原始请求继续处理", e);
         }
         if (requestWrapper == null) {
             chain.doFilter(request, response);

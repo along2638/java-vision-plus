@@ -15,7 +15,7 @@ spring:
   application:
     name: JavaVision
   jackson:
-    date-format: yyy-MM-dd HH:mm:ss
+    date-format: yyyy-MM-dd HH:mm:ss
     time-zone: Asia/Shanghai
   banner:
     charset: UTF-8
@@ -24,19 +24,110 @@ spring:
     multipart:
       max-file-size: 20MB
       max-request-size: 200MB
+  # PostgreSQL：人脸特征、图库元数据的持久化存储
+  # 注意：下面这些默认值是内网测试环境的连接信息，仅供本地联调。生产必须通过
+  #   PG_HOST / PG_PORT / PG_DB / PG_USER / PG_PASSWORD 环境变量覆盖，
+  #   部署脚本里不要依赖这里的默认值。
+  datasource:
+    url: jdbc:postgresql://${PG_HOST:127.0.0.1}:${PG_PORT:5432}/${PG_DB:java_vision}
+    username: ${PG_USER:postgres}
+    password: ${PG_PASSWORD:}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      pool-name: JavaVisionHikari
+      maximum-pool-size: 20
+      minimum-idle: 5
+      connection-timeout: 10000
+      validation-timeout: 3000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+  # 启动时执行幂等 DDL：表/索引不存在则创建，已存在则跳过
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:db/schema-pg.sql
+      # 脚本含中文注释，必须显式指定编码，否则 Windows 下按 GBK 读取会乱码
+      encoding: UTF-8
+  # Redis：缓存人脸特征、图片特征向量，加速检索
+  # 默认值同样是内网测试环境，生产用 REDIS_HOST / REDIS_PORT / REDIS_PASSWORD 覆盖
   redis:
-    host: 127.0.0.1
-    port: 6379
-    password:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:16377}
+    password: ${REDIS_PASSWORD:***REMOVED***}
+    database: ${REDIS_DB:0}
+    client-type: lettuce
+    timeout: 3000
+    lettuce:
+      pool:
+        max-active: 16
+        max-idle: 8
+        min-idle: 2
+        max-wait: 2000
+
+# 持久层：MyBatis-Plus
+# 建表与索引由 db/schema-pg.sql 负责，MP 只做 CRUD 映射，不生成 DDL
+mybatis-plus:
+  # 自定义 XML 放这里（当前全部用注解/Wrapper，暂无需 XML）
+  mapper-locations: classpath*:/mapper/**/*.xml
+  type-aliases-package: com.github.javpower.javavision.db
+  configuration:
+    # 下划线字段自动映射到驼峰属性，如 person_id -> personId
+    map-underscore-to-camel-case: true
+    # 交给 slf4j 输出，排查 SQL 时把日志级别调到 debug 即可
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    banner: false
+    db-config:
+      # 主键由数据库 identity 生成
+      id-type: auto
 
 ocr:
   # 文件上传相关配置
   file:
     # 上传文件访问路径
     accessPath: /file/**
-    # 上传文件保存路径
+    # 上传文件保存路径（相对路径基于启动目录解析为绝对路径）
     uploadPath: image/
+    # ocr/yolo 等推理接口处理完成后是否删除上传的临时文件
+    deleteAfterUse: true
+
+# MinIO 对象存储：人脸图、图库图等需要长期保留的资源存这里
+# enabled=false 时自动回退为本地磁盘（行为与改造前一致）
+# 生产环境必须用 MINIO_ACCESS_KEY / MINIO_SECRET_KEY 覆盖下面的测试值
+minio:
+  enabled: true
+  endpoint: ${MINIO_ENDPOINT:http://127.0.0.1:9000}
+  access-key: ${MINIO_ACCESS_KEY:}
+  secret-key: ${MINIO_SECRET_KEY:***REMOVED***}
+  bucket: ${MINIO_BUCKET:javavision}
+  # 对外访问地址，容器内网地址与客户端访问地址不一致时单独配置
+  public-url: ${MINIO_PUBLIC_URL:http://127.0.0.1:9000}
+  # 桶策略设为匿名只读，前端可直接用接口返回的 URL 展示图片
+  public-read: true
+  auto-create-bucket: true
+# 关闭 springdoc 的通用响应覆盖，避免 @ApiResponse 中定义的中文说明被 GlobalExceptionHandler 的通用响应覆盖
+springdoc:
+  override-with-generic-response: false
+
 vision:
+  # 启动预热：服务对外可用后在后台加载全部模型，并各跑一次空推理把 JIT/算子路径走热，
+  # 避免第一个真实请求额外等 3~7 秒
+  inference:
+    warmup:
+      enabled: true   # false = 恢复旧行为，模型在首次请求时才加载
+      async: true     # true = 独立线程预热，启动不被拖慢；false = 阻塞到全部完成
+      predict: true   # true = 加载后再跑一次空推理（真正消除首个请求的慢启动）
+    # 推理线程数不在这里配：它必须在 Spring 启动之前生效，用
+    #   java -Dvision.inference.threads=6 -jar ...   或环境变量 INFERENCE_THREADS=6
+    # 0/不填 = 不干预（引擎默认 = CPU 逻辑核数）
+  # 过渡期 API 兼容开关
+  api:
+    # 异常响应的 HTTP 状态码是否沿用改造前的"恒 200"行为。
+    # false（默认）= 按语义返回 400/405/409/413/500，前端请读响应体 code 判断成败；
+    # true          = 退回旧行为，异常也返回 200，错误只体现在响应体 code 里。
+    # 前端改造完成后把本项删掉即可（缺省就是 false）。
+    legacy-http-status: ${LEGACY_HTTP_STATUS:false}
   # swagger配置
   openapi:
     title: vision API Docs
@@ -51,15 +142,17 @@ vision:
     packagedToMatch:
       - com.github.javpower.javavision.controller
 es:
+  enable: false # 是否启用，未部署 elasticsearch 时请保持 false
   address:
   - 127.0.0.1:9200 # es连接地址+端口 格式必须为ip:port
 #  username: gc
 #  password: 123456
 
 # 该数据库仅作为测试，不定期删除
+# token 属于第三方云凭证，已从配置文件移除，需要时用 MILVUS_TOKEN 环境变量注入
 milvus:
-  uri: https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com
-  token: 6fab5641a3156d2666feba14390e4ef4b6d376b5dce91faed303eec91a4bdb82239b70b29eb252b981daa3170516245818d4ee12
+  uri: ${MILVUS_URI:https://in03-a5357975ab80da7.api.gcp-us-west1.zillizcloud.com}
+  token: ${MILVUS_TOKEN:}
   enable: false # 是否启用
   packages:
     - com.github.javpower.javavision.milvus.model
@@ -93,11 +186,21 @@ config:
 
 jedis:
   nodes:
-    - 127.0.0.1:6379
+    - ${REDIS_HOST:127.0.0.1}:${REDIS_PORT:16377}
+  password: ${REDIS_PASSWORD:***REMOVED***}
   pool:
     minIdle: 64
     maxIdle: 64
     maxTotal: 128
   timeout: 500
+
+# 缓存策略（Redis 不可用时自动降级为直接查库，不影响业务）
+cache:
+  face:
+    # 人脸特征全量缓存过期时间（分钟），写操作会主动失效
+    ttl-minutes: 30
+  image:
+    # 图片特征向量缓存过期时间（天），按文件 MD5 命中
+    ttl-days: 7
 
 

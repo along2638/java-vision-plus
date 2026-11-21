@@ -1,6 +1,7 @@
 package com.github.javpower.javavision.util;
 
 import ai.djl.MalformedModelException;
+import ai.djl.ModelException;
 import ai.djl.inference.Predictor;
 import ai.djl.modality.cv.Image;
 import ai.djl.modality.cv.ImageFactory;
@@ -11,7 +12,6 @@ import ai.djl.ndarray.NDList;
 import ai.djl.ndarray.NDManager;
 import ai.djl.repository.zoo.Criteria;
 import ai.djl.repository.zoo.ModelNotFoundException;
-import ai.djl.repository.zoo.ModelZoo;
 import ai.djl.repository.zoo.ZooModel;
 import ai.djl.translate.TranslateException;
 import ai.onnxruntime.OrtException;
@@ -47,16 +47,38 @@ public class OcrV4Util {
         Criteria<Image, NDList> criteria = ocrV4Detect.criteria();
         OcrV4Recognition ocrV4Recognition = new OcrV4Recognition(param);
         Criteria<Image, WordBlock> criteria1 = ocrV4Recognition.criteria();
-        try (ZooModel<Image, NDList> detectionModel = ModelZoo.loadModel(criteria);
-             Predictor<Image, NDList> detector = detectionModel.newPredictor();
-             ZooModel<Image, WordBlock> recognitionModel = ModelZoo.loadModel(criteria1);
-             Predictor<Image, WordBlock> recognizer = recognitionModel.newPredictor();
-             NDManager manager = NDManager.newBaseManager()) {
+        // 检测与识别两个模型常驻内存，Predictor 与 NDManager 每次请求新建
+        ZooModel<Image, NDList> detectionModel = loadModel(ocrV4Detect.modelName, criteria);
+        ZooModel<Image, WordBlock> recognitionModel = loadModel(ocrV4Recognition.modelName, criteria1);
+        try (Predictor<Image, NDList> detector = detectionModel.newPredictor(ocrV4Detect.translator());
+             Predictor<Image, WordBlock> recognizer = recognitionModel.newPredictor(ocrV4Recognition.translator());
+             NDManager manager = NDManager.newBaseManager(InferenceDevice.device())) {
              List<WordBlock> detections = predict(manager, image, detector, recognizer);
              log.info("内容识别==="+ JSONUtil.toJsonStr(detections));
              return detections;
         }
     }
+    /**
+     * 取缓存中的模型，首次调用才真正加载。
+     *
+     * <p>{@link DjlModelUtil#getModel} 抛出的 {@link ModelException} 比本类签名更宽，
+     * 这里按类型还原，其余情况包装成 IOException，保持对外异常契约不变。
+     */
+    private static <T> ZooModel<Image, T> loadModel(String key, Criteria<Image, T> criteria)
+            throws IOException, ModelNotFoundException, MalformedModelException {
+        try {
+            return DjlModelUtil.getModel(key, criteria);
+        } catch (ModelException e) {
+            if (e instanceof ModelNotFoundException) {
+                throw (ModelNotFoundException) e;
+            }
+            if (e instanceof MalformedModelException) {
+                throw (MalformedModelException) e;
+            }
+            throw new IOException("加载模型失败：" + key, e);
+        }
+    }
+
     /**
      * 图像推理
      *

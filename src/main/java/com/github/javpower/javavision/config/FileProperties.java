@@ -25,4 +25,9 @@ public class FileProperties {
      */
     private String uploadPath;
 
+    /**
+     * 推理类接口（ocr、yolo 等）处理完成后是否删除上传的临时文件
+     */
+    private boolean deleteAfterUse = true;
+
 }

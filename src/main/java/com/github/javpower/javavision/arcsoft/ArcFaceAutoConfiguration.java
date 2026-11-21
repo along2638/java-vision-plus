@@ -49,6 +49,9 @@ public class ArcFaceAutoConfiguration implements InitializingBean, DisposableBea
             osArch = "arm";
         } else if (osName.startsWith("mac os x") || osName.startsWith("darwin")) {
             osName = "macosx";
+        } else if (osName.startsWith("windows")) {
+            // Windows 10/11 的 os.name 为 "Windows 10"/"Windows 11"，需归一化为 "windows"
+            osName = "windows";
         }
 
         PLATFORM = osName + "-" + normalizeArch(osArch, abiType, libPath);

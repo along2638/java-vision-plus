@@ -1,6 +1,8 @@
 package com.github.javpower.javavision.util;
 
 
+import java.nio.file.Paths;
+
 /**
  * @author Monster
  */
@@ -9,7 +11,14 @@ public class PathConstants {
     private PathConstants() {
     }
 
-    public static final String TEMP_DIR = System.getProperty("java.io.tmpdir") + "ocrJava";
+    /**
+     * 模型与动态库的临时解压根目录。
+     * <p>
+     * 用 {@link Paths} 拼接而不是字符串相加，避免 java.io.tmpdir 末尾没有分隔符
+     * （例如 -Djava.io.tmpdir=/opt/cache）时拼出 /opt/cacheocrJava 这种错误路径。
+     */
+    public static final String TEMP_DIR =
+            Paths.get(System.getProperty("java.io.tmpdir"), "ocrJava").toString();
 
     /**
      * 推理引擎

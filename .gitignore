@@ -1,4 +1,6 @@
 target/
+# 运行期使用的 jar 副本（从 target 复制而来，避免 mvn clean 影响正在跑的进程）
+.run/
 .mvn/wrapper/maven-wrapper.jar
 **/src/main/**/target/
 **/src/test/**/target/
@@ -36,3 +38,13 @@ build/
 /models/
 /images/
 .DS_Store
+# 运行期日志目录（logback-spring.xml 默认输出到 ./logs）
+/logs/
+
+# ===== 运行期产生的数据，一律不入库 =====
+# 接口上传的临时图片（ocr.file.uploadPath）与 MinIO 中转目录
+/image/
+# vectorex 的 MapDB 数据文件（单实例文件锁，体积随数据增长）
+/vectorex/
+# 本地 AI 助手的工作区数据（会话记忆、临时产物）
+.workbuddy/

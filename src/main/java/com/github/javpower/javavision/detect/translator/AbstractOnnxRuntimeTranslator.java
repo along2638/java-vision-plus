@@ -4,6 +4,7 @@ import ai.onnxruntime.OrtEnvironment;
 import ai.onnxruntime.OrtException;
 import ai.onnxruntime.OrtSession;
 import com.github.javpower.javavision.entity.Detection;
+import com.github.javpower.javavision.util.OrtEnvironmentProvider;
 import org.opencv.core.Mat;
 
 import java.util.*;
@@ -25,7 +26,9 @@ public abstract class AbstractOnnxRuntimeTranslator {
 
 
     public AbstractOnnxRuntimeTranslator(String modelPath, String[] labels, float confThreshold, float nmsThreshold) throws OrtException {
-        this.environment = OrtEnvironment.getEnvironment();
+        // 必须与 DJL OnnxRuntime 引擎共用同一个 OrtEnvironment，
+        // 否则先调用 /yolo8 再调用 /word/json 时，DJL 侧会因参数不一致抛 IllegalStateException
+        this.environment = OrtEnvironmentProvider.get();
         OrtSession.SessionOptions sessionOptions = new OrtSession.SessionOptions();
         this.session = environment.createSession(modelPath, sessionOptions);
         this.labels = labels;

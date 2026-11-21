@@ -1,18 +1,41 @@
 package com.benjaminwan.ocrlibrary;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * RapidOCR 识别出的文本块。
+ */
+@Schema(description = "OCR 文本块（RapidOCR）")
 public class TextBlock {
+    @Schema(description = "文本框顶点坐标，4 个点按顺时针排列，每个点包含 x、y 像素坐标")
     private final ArrayList<Point> boxPoint;
+
+    @Schema(description = "文本框检测置信度，取值 0~1")
     private final float boxScore;
+
+    @Schema(description = "文本方向类别：0 表示 0°、1 表示 90°、2 表示 180°、3 表示 270°")
     private final int angleIndex;
+
+    @Schema(description = "文本方向分类置信度，取值 0~1")
     private final float angleScore;
+
+    @Schema(description = "文本方向分类耗时，单位毫秒")
     private final double angleTime;
+
+    @Schema(description = "识别出的文字内容", example = "安全生产人人有责")
     private final String text;
+
+    @Schema(description = "每个字符的置信度数组，与 text 的字符一一对应，取值 0~1")
     private final float[] charScores;
+
+    @Schema(description = "文字识别（CRNN）耗时，单位毫秒")
     private final double crnnTime;
+
+    @Schema(description = "该文本块的总处理耗时，单位毫秒")
     private final double blockTime;
 
     public TextBlock(

@@ -1,6 +1,7 @@
 package com.github.javpower.javavision.framework.filter;
 
-import cn.hutool.json.JSONUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.javpower.javavision.framework.response.ApiResult;
 import org.springframework.core.MethodParameter;
 import org.springframework.core.io.Resource;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 /**
@@ -20,6 +22,13 @@ import java.util.Objects;
  */
 @ControllerAdvice(annotations = RestController.class)
 public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
+
+    private final ObjectMapper objectMapper;
+
+    public RestResponseBodyAdvice(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @Override
     public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
         return !returnType.getDeclaringClass().getName().contains("springdoc");
@@ -38,7 +47,7 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
             return body;
         }
         //方法返回类型void
-        if (returnType.getMethod().getReturnType().isAssignableFrom(Void.TYPE)) {
+        if (returnType.getMethod().getReturnType() == Void.TYPE) {
             return ApiResult.success();
         }
         //ResultSet||ResponseEntity直接返回
@@ -47,9 +56,14 @@ public class RestResponseBodyAdvice implements ResponseBodyAdvice<Object> {
         }
         //处理string类型的返回值
         //当返回类型是String时，用的是StringHttpMessageConverter转换器，无法转换为Json格式
-        //必须在方法体上标注RequestMapping(produces = "application/json; charset=UTF-8")
+        //这里用 Jackson 序列化，保证 time 等字段与其它接口格式一致
         if (body instanceof String) {
-            return JSONUtil.toJsonStr(ApiResult.success(body));
+            response.getHeaders().setContentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8));
+            try {
+                return objectMapper.writeValueAsString(ApiResult.success(body));
+            } catch (JsonProcessingException e) {
+                throw new IllegalStateException("响应序列化失败", e);
+            }
         }
         //该方法返回的媒体类型是否是application/json。若不是，直接返回响应内容
         if (!selectedContentType.includes(MediaType.APPLICATION_JSON)) {

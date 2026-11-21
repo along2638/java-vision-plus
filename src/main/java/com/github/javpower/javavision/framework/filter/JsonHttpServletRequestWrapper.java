@@ -1,5 +1,6 @@
 package com.github.javpower.javavision.framework.filter;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StreamUtils;
 
 import javax.servlet.ReadListener;
@@ -13,11 +14,14 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
 /**
+ * 把请求体缓存成字节数组，允许后续重复读取。
+ *
  * @author gc.x
  * @date 2021/12/19
  **/
+@Slf4j
 public class JsonHttpServletRequestWrapper extends HttpServletRequestWrapper {
-    private byte[] body;
+    private byte[] body = new byte[0];
 
     public JsonHttpServletRequestWrapper(HttpServletRequest request) {
         super(request);
@@ -25,7 +29,8 @@ public class JsonHttpServletRequestWrapper extends HttpServletRequestWrapper {
         try {
             body = StreamUtils.copyToByteArray(request.getInputStream());
         } catch (IOException e) {
-            e.printStackTrace();
+            // 读不出来就当作空请求体，后续由业务或框架给出参数错误，不要让 NPE 冒到上层
+            log.warn("读取请求体失败，按空请求体处理", e);
         }
     }
 
